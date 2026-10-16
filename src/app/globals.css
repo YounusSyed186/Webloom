@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Caveat:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 16% 4%; /* #08090B */
+    --foreground: 255 13% 96%; /* #F5F3F7 */
+    --card: 240 14% 6%; /* #0D0F13 */
+    --card-foreground: 255 13% 96%;
+    --popover: 240 14% 6%;
+    --popover-foreground: 255 13% 96%;
+    --primary: 260 100% 71%; /* #9B6BFF */
+    --primary-foreground: 240 16% 4%;
+    --secondary: 240 7% 12%;
+    --secondary-foreground: 232 5% 67%; /* #A4A6B2 */
+    --muted: 240 6% 10%;
+    --muted-foreground: 230 7% 50%; /* #777B89 */
+    --accent: 260 100% 77%; /* #B48AFF */
+    --accent-foreground: 255 13% 96%;
+    --electric-blue: 226 100% 69%; /* #6488FF */
+    --success-green: 156 72% 52%; /* #34D399 */
+    --error-red: 0 91% 71%; /* #F87171 */
+    --warm-accent: 36 29% 88%; /* #E9E1D5 */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 255 13% 96%;
+    --border: 0 0% 100% / 0.10;
+    --border-strong: 0 0% 100% / 0.16;
+    --input: 0 0% 100% / 0.10;
+    --ring: 260 100% 71%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    border-color: rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #08090B;
+    color: #F4F3F0;
+  }
+
+  body {
+    background-color: #08090B;
+    color: #F4F3F0;
+    font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: rgba(167, 139, 250, 0.25);
+    color: #F4F3F0;
+  }
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #08090B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.35);
+}
+
+/* Webloom Brand & Subtle Lighting Utilities */
+.bg-webloom-black {
+  background-color: #08090B;
+}
+
+.bg-webloom-surface {
+  background-color: #0D0F13;
+}
+
+.bg-webloom-elevated {
+  background-color: #12141A;
+}
+
+.bg-webloom-secondary-surface {
+  background-color: #171920;
+}
+
+.text-webloom-primary {
+  color: #F5F3F7;
+}
+
+.text-webloom-secondary {
+  color: #A4A6B2;
+}
+
+.text-webloom-muted {
+  color: #777B89;
+}
+
+.text-webloom-accent {
+  color: #9B6BFF;
+}
+
+.text-webloom-accent-secondary {
+  color: #B48AFF;
+}
+
+.text-webloom-blue {
+  color: #6488FF;
+}
+
+.border-webloom-subtle {
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.border-webloom-strong {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.border-webloom-hover {
+  border-color: rgba(155, 107, 255, 0.45);
+}
+
+.font-editorial-serif {
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.font-caveat {
+  font-family: 'Caveat', cursive;
+}
+
+.radial-subtle-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(155, 107, 255, 0.08) 0%, transparent 70%);
+}
+
+.radial-hero-light {
+  background: radial-gradient(circle at 70% 30%, rgba(155, 107, 255, 0.12) 0%, rgba(100, 136, 255, 0.05) 40%, transparent 70%);
+}
