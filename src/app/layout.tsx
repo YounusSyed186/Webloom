@@ -38,8 +38,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-[#08090B] text-[#F4F3F0] min-h-screen antialiased selection:bg-[#A78BFA]/25 selection:text-[#F4F3F0]">
+    <html lang="en">
+      <body className="bg-[#FAF6EE] text-[#1F1A16] min-h-screen antialiased selection:bg-[#FDE68A] selection:text-[#1F1A16]">
         <AppProvider>
           <ToastProvider>{children}</ToastProvider>
         </AppProvider>

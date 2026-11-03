@@ -1,30 +1,20 @@
 'use client';
 
 import React from 'react';
-import { Navbar } from '@/components/landing/navbar';
-import { HeroSection } from '@/components/landing/hero/hero-section';
-import { CreatorTrustStrip } from '@/components/landing/creator-trust-strip';
-import { MoreThanLinkInBioSection } from '@/components/landing/more-than-link-in-bio';
-import { WhatIsWebloomSection } from '@/components/landing/what-is-webloom';
-import { BloomPhilosophySection } from '@/components/landing/bloom-philosophy';
-import { PageCraftSection } from '@/components/landing/page-craft-section';
-import { LinksSection } from '@/components/landing/links-section';
-import { ProjectsSection } from '@/components/landing/projects-section';
-import { CustomizationSection } from '@/components/landing/customization-section';
-import { LivePreviewSection } from '@/components/landing/live-preview-section';
-import { IdentitySection } from '@/components/landing/identity-section';
-import { AnalyticsSection } from '@/components/landing/analytics-section';
-import { SharingSection } from '@/components/landing/sharing-section';
-import { ExamplesSection } from '@/components/landing/examples-section';
-import { AudienceSection } from '@/components/landing/audience-section';
-import { DifferentiationSection } from '@/components/landing/differentiation-section';
-import { SetupSection } from '@/components/landing/setup-section';
-import { FeatureSummarySection } from '@/components/landing/feature-summary-section';
-import { PrivacySection } from '@/components/landing/privacy-section';
-import { PricingSection } from '@/components/landing/pricing-section';
-import { FAQSection } from '@/components/landing/faq-section';
-import { FinalCTA } from '@/components/landing/final-cta';
-import { Footer } from '@/components/landing/footer';
+import { WebloomPreloader } from '@/components/landing/reconstruction/preloader';
+import { ScrollProgressThread } from '@/components/landing/reconstruction/motion-primitives';
+import { WebloomNavbar } from '@/components/landing/reconstruction/navbar';
+import { HeroReconstructed } from '@/components/landing/reconstruction/hero';
+import { TrustStripReconstructed } from '@/components/landing/reconstruction/trust-strip';
+import { WhatYouCanBuildReconstructed } from '@/components/landing/reconstruction/what-you-can-build';
+import { DesignsFeelLikeYouReconstructed } from '@/components/landing/reconstruction/designs-feel-like-you';
+import { HowItWorksReconstructed } from '@/components/landing/reconstruction/how-it-works';
+import { InsightsAndSharingReconstructed } from '@/components/landing/reconstruction/insights-and-sharing';
+import { AudienceHomeReconstructed } from '@/components/landing/reconstruction/audience-home';
+import { PricingReconstructed } from '@/components/landing/reconstruction/pricing';
+import { FAQReconstructed } from '@/components/landing/reconstruction/faq-reconstructed';
+import { BottomRibbonReconstructed } from '@/components/landing/reconstruction/bottom-ribbon';
+import { WebloomFooter } from '@/components/landing/reconstruction/footer';
 import { AuthModal } from '@/components/auth/auth-modal';
 import { useApp } from '@/lib/context/app-context';
 
@@ -32,83 +22,51 @@ export default function HomePage() {
   const { isAuthModalOpen, setIsAuthModalOpen, authModalMode } = useApp();
 
   return (
-    <div className="min-h-screen bg-[#08090B] text-[#F4F3F0] selection:bg-[#A78BFA]/25 selection:text-[#F4F3F0]">
-      {/* Webloom Navigation */}
-      <Navbar />
+    <div className="min-h-screen bg-[#FAF6EE] text-[#1F1A16] flex flex-col items-center justify-start overflow-x-hidden selection:bg-[#FDE68A] selection:text-[#1F1A16]">
+      {/* 0. Branded Preloader & Golden Scroll Progress Thread */}
+      <WebloomPreloader />
+      <ScrollProgressThread />
 
-      {/* Main Narrative Structure */}
-      <main>
-        {/* HERO */}
-        <HeroSection />
+      {/* 1. Header / Navbar */}
+      <WebloomNavbar />
 
-        {/* 🤝 SECTION TWO — TRUST & CREATOR ECOSYSTEM STRIP */}
-        <CreatorTrustStrip />
+      {/* 2. Main Narrative Landing Flow */}
+      <main className="w-full flex flex-col items-center">
+        {/* 2.1 Hero Section: Headline, CTAs, and Studio Workspace Showcase */}
+        <HeroReconstructed />
 
-        {/* ⚡ SECTION THREE — MORE THAN A LINK IN BIO (4 FEATURE CARDS) */}
-        <MoreThanLinkInBioSection />
+        {/* 2.2 Trust Strip: Notion, Figma, Vercel, GitHub, Spotify, Adobe */}
+        <TrustStripReconstructed />
 
-        {/* 🌱 WHAT IS WEBLOOM — Linktree + Portfolio + Personal Website */}
-        <WhatIsWebloomSection />
+        {/* 2.3 What You Can Build: 4 Handmade Deckle-Edge Feature Cards */}
+        <WhatYouCanBuildReconstructed />
 
-        {/* 🌸 WHY THE NAME WEBLOOM — Web + Bloom Philosophy */}
-        <BloomPhilosophySection />
+        {/* 2.4 Designs That Feel Like You: Portfolio Window & 4 Templates */}
+        <DesignsFeelLikeYouReconstructed />
 
-        {/* SECTION — YOUR PAGE — Make the web feel like yours */}
-        <PageCraftSection />
+        {/* 2.5 How It Works: Interactive Handle Claim Bar & 3 Step Cards */}
+        <HowItWorksReconstructed />
 
-        {/* SECTION — LINKS — Everything worth sharing. In one place */}
-        <LinksSection />
+        {/* 2.6 Insights & Sharing: Calm Analytics Ledger & Personal QR Calling Card */}
+        <InsightsAndSharingReconstructed />
 
-        {/* SECTION — PROJECTS — Show what you've made */}
-        <ProjectsSection />
+        {/* 2.7 Audience Home: Panoramic Countryside Cottage & Audience Roles */}
+        <AudienceHomeReconstructed />
 
-        {/* SECTION — CUSTOMIZATION — No two Weblooms should look the same */}
-        <CustomizationSection />
+        {/* 2.8 Pricing Section: Seed Free, Creator Pro, Studio */}
+        <PricingReconstructed />
 
-        {/* SECTION — LIVE PREVIEW — See it come together as you build */}
-        <LivePreviewSection />
+        {/* 2.9 FAQ Section: Stationery Slip Accordion */}
+        <FAQReconstructed />
 
-        {/* SECTION — PERSONAL IDENTITY — Build a page people remember */}
-        <IdentitySection />
-
-        {/* SECTION — ANALYTICS — Know what people actually find */}
-        <AnalyticsSection />
-
-        {/* SECTION — SHARING — One link. Everywhere */}
-        <SharingSection />
-
-        {/* SECTION — EXAMPLES — One platform. Infinite ways to make it yours */}
-        <ExamplesSection />
-
-        {/* SECTION — AUDIENCE — Made for people who make things */}
-        <AudienceSection />
-
-        {/* SECTION — DIFFERENTIATION — Your identity shouldn't depend on a template */}
-        <DifferentiationSection />
-
-        {/* SECTION — SIMPLE SETUP — From nothing to your own page in minutes */}
-        <SetupSection />
-
-        {/* SECTION — FEATURE SUMMARY — Everything you need to build your presence */}
-        <FeatureSummarySection />
-
-        {/* SECTION — PRIVACY / TRUST — Your page. Your content. Your control */}
-        <PrivacySection />
-
-        {/* SECTION — PRICING — Start free. Make it yours */}
-        <PricingSection />
-
-        {/* SECTION — FAQ — Questions, answered */}
-        <FAQSection />
-
-        {/* FINAL CTA — Make your corner of the internet */}
-        <FinalCTA />
+        {/* 2.10 Bottom CTA Ribbon: Handmade Lavender Botanical Banner */}
+        <BottomRibbonReconstructed />
       </main>
 
-      {/* Footer */}
-      <Footer />
+      {/* 3. Footer */}
+      <WebloomFooter />
 
-      {/* Authentication Modal */}
+      {/* Auth Modal for Login / Signup */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

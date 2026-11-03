@@ -9,6 +9,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ['Newsreader', 'Georgia', 'serif'],
+        sans: ['Geist', 'Inter', 'system-ui', 'sans-serif'],
+        handwriting: ['Caveat', 'cursive'],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
