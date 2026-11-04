@@ -147,3 +147,103 @@
 .radial-hero-light {
   background: radial-gradient(circle at 70% 30%, rgba(155, 107, 255, 0.12) 0%, rgba(100, 136, 255, 0.05) 40%, transparent 70%);
 }
+
+/* ============================================================================
+   Interactive Cursor-Following Image Mask Reveal (Baseline @property + CSS Mask)
+   ============================================================================ */
+@property --reveal-inner-size {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --reveal-outer-size {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.webloom-cream-paper-mask {
+  transition: --reveal-inner-size 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    --reveal-outer-size 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Inverted radial mask on the top #FAF6EE cream paper layer:
+     Punches a soft, feathered, slightly elliptical flashlight window around
+     (--cursor-x, --cursor-y) to reveal the hidden dark cinematic photograph underneath. */
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--reveal-outer-size, 0px) * 1.07) calc(var(--reveal-outer-size, 0px) * 0.94)
+      at var(--cursor-x, -999px) var(--cursor-y, -999px),
+    rgba(0, 0, 0, var(--cream-center-alpha, 0.14)) 0%,
+    rgba(0, 0, 0, 0.38) var(--reveal-inner-size, 0px),
+    rgba(0, 0, 0, 0.78) calc(var(--reveal-outer-size, 0px) * 0.72),
+    rgba(0, 0, 0, 1) var(--reveal-outer-size, 0px)
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--reveal-outer-size, 0px) * 1.07) calc(var(--reveal-outer-size, 0px) * 0.94)
+      at var(--cursor-x, -999px) var(--cursor-y, -999px),
+    rgba(0, 0, 0, var(--cream-center-alpha, 0.14)) 0%,
+    rgba(0, 0, 0, 0.38) var(--reveal-inner-size, 0px),
+    rgba(0, 0, 0, 0.78) calc(var(--reveal-outer-size, 0px) * 0.72),
+    rgba(0, 0, 0, 1) var(--reveal-outer-size, 0px)
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.webloom-photo-spotlight-mask {
+  transition: --reveal-inner-size 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    --reveal-outer-size 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Direct radial spotlight mask for revealing the continuous dark photograph
+     within sections that have their own illustrated backdrop (e.g., Hero studio wall). */
+  -webkit-mask-image: radial-gradient(
+    ellipse calc(var(--reveal-outer-size, 0px) * 1.07) calc(var(--reveal-outer-size, 0px) * 0.94)
+      at var(--cursor-x, -999px) var(--cursor-y, -999px),
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.62) var(--reveal-inner-size, 0px),
+    rgba(0, 0, 0, 0.22) calc(var(--reveal-outer-size, 0px) * 0.72),
+    transparent var(--reveal-outer-size, 0px)
+  );
+  mask-image: radial-gradient(
+    ellipse calc(var(--reveal-outer-size, 0px) * 1.07) calc(var(--reveal-outer-size, 0px) * 0.94)
+      at var(--cursor-x, -999px) var(--cursor-y, -999px),
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.62) var(--reveal-inner-size, 0px),
+    rgba(0, 0, 0, 0.22) calc(var(--reveal-outer-size, 0px) * 0.72),
+    transparent var(--reveal-outer-size, 0px)
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webloom-cream-paper-mask,
+  .webloom-photo-spotlight-mask,
+  .webloom-dark-replica-mask,
+  .webloom-dark-navbar-mask {
+    transition: none !important;
+  }
+}
+
+/* ============================================================================
+   Synchronized Dual-Layer Theme Reveal (Hardware-Accelerated Crisp Circle)
+   ============================================================================ */
+.webloom-dark-replica-mask {
+  clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-doc-x, -9999px) var(--cursor-doc-y, -9999px));
+  -webkit-clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-doc-x, -9999px) var(--cursor-doc-y, -9999px));
+  will-change: clip-path;
+  pointer-events: none;
+}
+
+.webloom-dark-navbar-mask {
+  clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-win-x, -9999px) var(--cursor-win-y, -9999px));
+  -webkit-clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-win-x, -9999px) var(--cursor-win-y, -9999px));
+  will-change: clip-path;
+  pointer-events: none;
+}
+
+/* Ensure all content inside the reveal container renders without being stuck at opacity: 0 */
+.webloom-dark-replica-mask [style*="opacity: 0"],
+.webloom-dark-replica-mask [style*="opacity:0"] {
+  opacity: 1 !important;
+}

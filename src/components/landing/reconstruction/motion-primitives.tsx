@@ -8,10 +8,11 @@ import {
   useTransform,
   useReducedMotion,
   useScroll,
+  MotionValue,
 } from 'framer-motion';
 
 /**
- * Top 2px warm golden-ochre scroll progress bar
+ * Top 2.5px warm golden-ochre scroll progress bar
  */
 export function ScrollProgressThread() {
   const { scrollYProgress } = useScroll();
@@ -24,8 +25,176 @@ export function ScrollProgressThread() {
   return (
     <motion.div
       style={{ scaleX }}
-      className="fixed top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#C89D54] via-[#E6B84C] to-[#9C7248] origin-left z-[100] pointer-events-none"
+      className="fixed top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#C89D54] via-[#F7DC6F] to-[#9C7248] origin-left z-[100] pointer-events-none shadow-[0_1px_6px_rgba(230,184,76,0.45)]"
     />
+  );
+}
+
+/**
+ * Hook that returns continuous, reversible scroll progress (0 -> 0.5 -> 1)
+ * and spring-smoothed 3D camera transforms for any section.
+ */
+export function useSceneCamera(
+  ref: React.RefObject<HTMLElement | null>,
+  options?: {
+    enterRotateX?: number;
+    exitRotateX?: number;
+    enterZ?: number;
+    exitZ?: number;
+    enterY?: number;
+    exitY?: number;
+  }
+) {
+  const {
+    enterRotateX = 10.5,
+    exitRotateX = -6.5,
+    enterZ = -75,
+    exitZ = 24,
+    enterY = 34,
+    exitY = -22,
+  } = options ?? {};
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 110,
+    damping: 26,
+    mass: 0.5,
+  });
+
+  const rotateX = useTransform(
+    smoothProgress,
+    [0, 0.36, 0.66, 1],
+    [enterRotateX, 0, 0, exitRotateX]
+  );
+  const z = useTransform(
+    smoothProgress,
+    [0, 0.36, 0.66, 1],
+    [enterZ, 0, 0, exitZ]
+  );
+  const y = useTransform(
+    smoothProgress,
+    [0, 0.35, 0.68, 1],
+    [enterY, 0, 0, exitY]
+  );
+  const scale = useTransform(
+    smoothProgress,
+    [0, 0.35, 0.68, 1],
+    [0.935, 1, 1, 0.975]
+  );
+  const opacity = useTransform(
+    smoothProgress,
+    [0, 0.16, 0.86, 1],
+    [0.35, 1, 1, 0.65]
+  );
+
+  return {
+    scrollYProgress,
+    smoothProgress,
+    rotateX,
+    z,
+    y,
+    scale,
+    opacity,
+  };
+}
+
+/**
+ * Scroll-synchronized 3D Camera Scene Wrapper
+ */
+export function CinematicCameraScene({
+  children,
+  className = '',
+  perspective = 1400,
+  enterRotateX = 6.5,
+  exitRotateX = -3.5,
+  enterY = 24,
+  exitY = -16,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  perspective?: number;
+  enterRotateX?: number;
+  exitRotateX?: number;
+  enterY?: number;
+  exitY?: number;
+}) {
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const { rotateX, z, y, scale } = useSceneCamera(sceneRef, {
+    enterRotateX,
+    exitRotateX,
+    enterY,
+    exitY,
+  });
+
+  return (
+    <div
+      ref={sceneRef}
+      style={{ perspective }}
+      className={`relative w-full ${className}`}
+    >
+      <motion.div
+        style={
+          prefersReducedMotion
+            ? undefined
+            : {
+                rotateX,
+                z,
+                y,
+                scale,
+                transformStyle: 'preserve-3d',
+              }
+        }
+        className="w-full"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * Cinematic Section Transition Bridge
+ */
+export function CinematicSectionBridge({
+  variant = 'gold',
+}: {
+  variant?: 'gold' | 'sage';
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start 90%', 'end 35%'],
+  });
+  const scaleY = useSpring(scrollYProgress, { stiffness: 120, damping: 24 });
+
+  return (
+    <div
+      ref={ref}
+      aria-hidden="true"
+      className="relative w-full h-7 sm:h-9 flex flex-col items-center justify-center pointer-events-none overflow-hidden"
+    >
+      <div className="w-[1px] h-full bg-[#E5DAC8]/70 relative overflow-hidden">
+        <motion.div
+          style={{ scaleY: prefersReducedMotion ? 1 : scaleY, originY: 0 }}
+          className={`w-full h-full ${
+            variant === 'gold'
+              ? 'bg-gradient-to-b from-[#C89D54] via-[#F7DC6F] to-[#9C7248]'
+              : 'bg-gradient-to-b from-[#7E9674] via-[#B4C6A6] to-[#7E9674]'
+          }`}
+        />
+      </div>
+      <motion.span
+        style={{ scale: prefersReducedMotion ? 1 : scaleY }}
+        className="w-1.5 h-1.5 rounded-full bg-[#C89D54] -mt-1 shadow-[0_0_6px_rgba(200,157,84,0.6)]"
+      />
+    </div>
   );
 }
 
@@ -90,7 +259,7 @@ export function Tilt3DCard({
   className?: string;
   maxTilt?: number;
   scaleOnHover?: number;
-  style?: React.CSSProperties;
+  style?: React.CSSProperties | Record<string, unknown>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -116,23 +285,24 @@ export function Tilt3DCard({
     const ny = (e.clientY - rect.top) / rect.height - 0.5;
     mouseX.set(nx);
     mouseY.set(ny);
+    if (!isHovered) setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
     mouseX.set(0);
     mouseY.set(0);
+    setIsHovered(false);
   };
 
   return (
     <motion.div
       ref={ref}
-      onMouseEnter={() => setIsHovered(true)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       whileHover={prefersReducedMotion ? undefined : { scale: scaleOnHover, y: -4 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 20 }}
       style={{
-        ...style,
+        ...(style as Record<string, MotionValue<number> | string | number>),
         rotateX: prefersReducedMotion ? 0 : rotateX,
         rotateY: prefersReducedMotion ? 0 : rotateY,
         transformPerspective: 1100,
@@ -141,17 +311,16 @@ export function Tilt3DCard({
       className={className}
     >
       {children}
-      {/* Warm sunlight specular sheen overlay on hover */}
       {!prefersReducedMotion && (
         <motion.div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-[inherit] z-30 transition-opacity duration-300"
           style={{
-            opacity: isHovered ? 0.28 : 0,
+            opacity: isHovered ? 0.22 : 0,
             background: useTransform(
               [glareX, glareY],
               ([gx, gy]) =>
-                `radial-gradient(circle at ${gx} ${gy}, rgba(255,252,240,0.45) 0%, rgba(255,252,240,0) 48%)`
+                `radial-gradient(circle at ${gx} ${gy}, rgba(255,244,214,0.38) 0%, rgba(255,244,214,0) 48%)`
             ),
           }}
         />
@@ -195,7 +364,6 @@ export function AnimatedCounter({
           const start = performance.now();
           const tick = (now: number) => {
             const progress = Math.min(1, (now - start) / duration);
-            // Ease out cubic
             const eased = 1 - Math.pow(1 - progress, 3);
             const current = value * eased;
             setDisplay(
@@ -228,4 +396,3 @@ export function AnimatedCounter({
     </span>
   );
 }
-

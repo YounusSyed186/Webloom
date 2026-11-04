@@ -1,31 +1,79 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import {
+  motion,
+  useScroll,
+  useSpring,
+  useTransform,
+  useReducedMotion,
+} from 'framer-motion';
+import { useWebloomTheme, useIsWebloomOverlay } from './webloom-dual-theme-context';
 
 export function TrustStripReconstructed() {
+  const theme = useWebloomTheme();
+  const isOverlay = useIsWebloomOverlay();
+  const isDark = theme === 'dark';
+  const sectionRef = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const smoothScroll = useSpring(scrollYProgress, {
+    stiffness: 110,
+    damping: 26,
+  });
+
+  const rotateX = useTransform(smoothScroll, [0, 0.5, 1], [11, 0, -8]);
+  const stripX = useTransform(smoothScroll, [0, 0.5, 1], [-14, 0, 14]);
+  const stripZ = useTransform(smoothScroll, [0, 0.5, 1], [-30, 0, -15]);
+
   return (
-    <section className="w-full bg-[#FAF6EE] pt-6 pb-8 md:pt-8 md:pb-10 select-none">
-      <div className="max-w-6xl mx-auto px-6 text-center">
+    <section
+      ref={sectionRef}
+      style={{ perspective: 1200 }}
+      className="w-full pt-6 pb-8 md:pt-8 md:pb-10 select-none overflow-hidden"
+    >
+      <motion.div
+        style={
+          prefersReducedMotion
+            ? undefined
+            : {
+                rotateX,
+                z: stripZ,
+                transformStyle: 'preserve-3d',
+              }
+        }
+        className="max-w-6xl mx-auto px-6 text-center"
+      >
         <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={isOverlay ? false : { opacity: 0, y: 8 }}
+          animate={isOverlay ? { opacity: 1, y: 0 } : undefined}
+          whileInView={isOverlay ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.45 }}
-          className="text-[12px] sm:text-[13px] font-medium tracking-wide text-[#786D5F] mb-6"
+          className={`text-[12px] sm:text-[13px] font-medium tracking-wide mb-6 ${
+            isDark ? 'text-[#A89B8C]' : 'text-[#786D5F]'
+          }`}
         >
           Trusted by creators, students, and professionals
         </motion.p>
 
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          style={prefersReducedMotion ? undefined : { x: stripX }}
+          initial={isOverlay ? "visible" : "hidden"}
+          animate={isOverlay ? "visible" : undefined}
+          whileInView={isOverlay ? undefined : "visible"}
           viewport={{ once: true, amount: 0.3 }}
           variants={{
             hidden: {},
             visible: { transition: { staggerChildren: 0.06 } },
           }}
-          className="flex flex-wrap items-center justify-center gap-7 sm:gap-10 md:gap-14 text-[#221E1B]"
+          className={`flex flex-wrap items-center justify-center gap-7 sm:gap-10 md:gap-14 ${
+            isDark ? 'text-[#EAE0D2]' : 'text-[#221E1B]'
+          }`}
         >
           {/* Notion */}
           <motion.div
@@ -33,7 +81,7 @@ export function TrustStripReconstructed() {
               hidden: { opacity: 0, y: 10 },
               visible: { opacity: 0.85, y: 0 },
             }}
-            whileHover={{ opacity: 1, y: -2.5, scale: 1.04 }}
+            whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -48,7 +96,7 @@ export function TrustStripReconstructed() {
               hidden: { opacity: 0, y: 10 },
               visible: { opacity: 0.85, y: 0 },
             }}
-            whileHover={{ opacity: 1, y: -2.5, scale: 1.04 }}
+            whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
             <svg className="w-3.5 h-4.5 fill-current" viewBox="0 0 38 57">
@@ -67,7 +115,7 @@ export function TrustStripReconstructed() {
               hidden: { opacity: 0, y: 10 },
               visible: { opacity: 0.85, y: 0 },
             }}
-            whileHover={{ opacity: 1, y: -2.5, scale: 1.04 }}
+            whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -82,7 +130,7 @@ export function TrustStripReconstructed() {
               hidden: { opacity: 0, y: 10 },
               visible: { opacity: 0.85, y: 0 },
             }}
-            whileHover={{ opacity: 1, y: -2.5, scale: 1.04 }}
+            whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -97,7 +145,7 @@ export function TrustStripReconstructed() {
               hidden: { opacity: 0, y: 10 },
               visible: { opacity: 0.85, y: 0 },
             }}
-            whileHover={{ opacity: 1, y: -2.5, scale: 1.04 }}
+            whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -112,7 +160,7 @@ export function TrustStripReconstructed() {
               hidden: { opacity: 0, y: 10 },
               visible: { opacity: 0.85, y: 0 },
             }}
-            whileHover={{ opacity: 1, y: -2.5, scale: 1.04 }}
+            whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -121,7 +169,7 @@ export function TrustStripReconstructed() {
             <span className="font-semibold text-[13.5px] tracking-tight">Adobe</span>
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
