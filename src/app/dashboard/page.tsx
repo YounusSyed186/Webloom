@@ -20,18 +20,19 @@ import {
   Clock,
   Share2,
   CheckCircle2,
-  Layers
 } from 'lucide-react';
 import { useApp } from '@/lib/context/app-context';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { ShareModal } from '@/components/sharing/share-modal';
+import { clsx } from 'clsx';
 
 export default function DashboardOverviewPage() {
-  const { profile, links, projects, analytics, activityLogs } = useApp();
+  const { profile, links, projects, analytics, activityLogs, themeMode } = useApp();
   const { success } = useToast();
   const [copied, setCopied] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const isDark = themeMode === 'dark';
 
   const publicUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/${profile.username}`
@@ -58,50 +59,71 @@ export default function DashboardOverviewPage() {
       label: 'Profile Views',
       value: analytics.profileViews.toLocaleString(),
       change: analytics.viewsChange || '+0%',
-      trend: 'up',
       icon: Eye,
-      color: 'text-blue-400',
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/20',
+      color: isDark ? 'text-[#E6B86A]' : 'text-[#967137]',
+      bg: isDark ? 'bg-[#2E241B]' : 'bg-[#EAE2D3]',
+      border: isDark ? 'border-[#44382E]' : 'border-[#DACBB4]',
     },
     {
       label: 'Total Link Clicks',
       value: analytics.linkClicks.toLocaleString(),
       change: analytics.clicksChange || '+0%',
-      trend: 'up',
       icon: MousePointerClick,
-      color: 'text-indigo-400',
-      bg: 'bg-indigo-500/10',
-      border: 'border-indigo-500/20',
+      color: isDark ? 'text-[#F29D7A]' : 'text-[#B2533E]',
+      bg: isDark ? 'bg-[#2E1E1A]' : 'bg-[#F5E2DC]',
+      border: isDark ? 'border-[#4A322C]' : 'border-[#E5C2BA]',
     },
     {
       label: 'Average CTR',
       value: `${analytics.clickThroughRate}%`,
       change: analytics.ctrChange || '+0%',
-      trend: 'up',
       icon: TrendingUp,
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      border: 'border-emerald-500/20',
+      color: isDark ? 'text-[#87B99B]' : 'text-[#48735A]',
+      bg: isDark ? 'bg-[#1C2820]' : 'bg-[#E2EDE5]',
+      border: isDark ? 'border-[#2E4235]' : 'border-[#C4DAC9]',
     },
     {
       label: 'Network Reach',
       value: analytics.followersCount.toLocaleString(),
       change: '+100%',
-      trend: 'up',
       icon: Users,
-      color: 'text-purple-400',
-      bg: 'bg-purple-500/10',
-      border: 'border-purple-500/20',
+      color: isDark ? 'text-[#C4A9D8]' : 'text-[#7A5B96]',
+      bg: isDark ? 'bg-[#282030]' : 'bg-[#EFE8F5]',
+      border: isDark ? 'border-[#423450]' : 'border-[#D9CDE3]',
     },
   ];
 
   const quickActions = [
-    { label: 'Add New Link', href: '/dashboard/links', icon: Plus, color: 'bg-blue-600 hover:bg-blue-500' },
-    { label: 'Edit Profile', href: '/dashboard/profile', icon: User, color: 'bg-zinc-800 hover:bg-zinc-700' },
-    { label: 'Appearance', href: '/dashboard/appearance', icon: Palette, color: 'bg-zinc-800 hover:bg-zinc-700' },
-    { label: 'Add Project', href: '/dashboard/projects', icon: FolderGit2, color: 'bg-zinc-800 hover:bg-zinc-700' },
-    { label: 'View Analytics', href: '/dashboard/analytics', icon: BarChart3, color: 'bg-zinc-800 hover:bg-zinc-700' },
+    {
+      label: 'Add New Link',
+      href: '/dashboard/links',
+      icon: Plus,
+      color: isDark ? 'bg-[#E6B86A] text-[#181410]' : 'bg-[#1F1A16] text-[#FAF6EE]',
+    },
+    {
+      label: 'Edit Profile',
+      href: '/dashboard/profile',
+      icon: User,
+      color: isDark ? 'bg-[#28211B] text-[#F4EFE6]' : 'bg-[#EAE2D3] text-[#1F1A16]',
+    },
+    {
+      label: 'Appearance',
+      href: '/dashboard/appearance',
+      icon: Palette,
+      color: isDark ? 'bg-[#28211B] text-[#F4EFE6]' : 'bg-[#EAE2D3] text-[#1F1A16]',
+    },
+    {
+      label: 'Add Project',
+      href: '/dashboard/projects',
+      icon: FolderGit2,
+      color: isDark ? 'bg-[#28211B] text-[#F4EFE6]' : 'bg-[#EAE2D3] text-[#1F1A16]',
+    },
+    {
+      label: 'View Analytics',
+      href: '/dashboard/analytics',
+      icon: BarChart3,
+      color: isDark ? 'bg-[#28211B] text-[#F4EFE6]' : 'bg-[#EAE2D3] text-[#1F1A16]',
+    },
   ];
 
   return (
@@ -110,25 +132,40 @@ export default function DashboardOverviewPage() {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        className={clsx(
+          "p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors",
+          isDark
+            ? "bg-[#1E1915] border-[#382F26]"
+            : "bg-[#F6F0E4] border-[#E5DEC9]"
+        )}
       >
         <div className="space-y-1.5 flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-white">Your Profile is {completion}% Complete</span>
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+            <span className="text-xs font-semibold">Your Profile is {completion}% Complete</span>
+            <span className={clsx(
+              "text-[10px] font-mono px-2 py-0.5 rounded-full border",
               completion >= 80 
-                ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30'
-                : 'text-amber-400 bg-amber-500/15 border-amber-500/30'
-            }`}>
+                ? isDark
+                  ? "text-[#87B99B] bg-[#1C2820] border-[#2E4235]"
+                  : "text-[#48735A] bg-[#E2EDE5] border-[#C4DAC9]"
+                : isDark
+                ? "text-[#E6B86A] bg-[#2E241B] border-[#44382E]"
+                : "text-[#967137] bg-[#FAF2E6] border-[#DACBB4]"
+            )}>
               {completion >= 80 ? 'Optimal' : 'In Progress'}
             </span>
           </div>
-          <div className="w-full max-w-md h-2 bg-zinc-800 rounded-full overflow-hidden">
+          <div
+            className={clsx(
+              "w-full max-w-md h-2 rounded-full overflow-hidden",
+              isDark ? "bg-[#28211B]" : "bg-[#EAE2D3]"
+            )}
+          >
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${completion}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full"
+              className="h-full bg-gradient-to-r from-[#C89D54] to-[#E6B86A] rounded-full"
             />
           </div>
         </div>
@@ -144,34 +181,54 @@ export default function DashboardOverviewPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-950/40 via-zinc-900/90 to-zinc-900 border border-blue-500/20 p-6 sm:p-8 shadow-2xl"
+        className={clsx(
+          "relative overflow-hidden rounded-3xl border p-6 sm:p-8 shadow-sm transition-colors",
+          isDark
+            ? "bg-gradient-to-br from-[#241E18] via-[#1E1915] to-[#181411] border-[#382F26]"
+            : "bg-gradient-to-br from-[#FAF6EE] via-[#F6F0E4] to-[#EFE7DA] border-[#E5DEC9]"
+        )}
       >
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-medium">
+            <div
+              className={clsx(
+                "inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-medium",
+                isDark
+                  ? "bg-[#2C241D] border-[#44382E] text-[#E6B86A]"
+                  : "bg-[#EFE7DA] border-[#DFD0BC] text-[#865E24]"
+              )}
+            >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Your Digital Identity Hub</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-tight flex items-center gap-2">
               <span>@{profile.username}</span>
               {profile.verified && (
-                <CheckCircle2 className="w-5 h-5 text-blue-400 fill-blue-400/20" />
+                <CheckCircle2
+                  className={clsx(
+                    "w-5 h-5",
+                    isDark ? "text-[#E6B86A]" : "text-[#967137]"
+                  )}
+                />
               )}
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-300 font-mono">
+            <p
+              className={clsx(
+                "text-xs sm:text-sm font-mono",
+                isDark ? "text-[#A89F91]" : "text-[#6E6254]"
+              )}
+            >
               {publicUrl}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <Button variant="primary" size="sm" onClick={handleCopy} className="gap-2">
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied' : 'Copy Link'}</span>
             </Button>
             <Button variant="secondary" size="sm" onClick={() => setIsShareOpen(true)} className="gap-2">
-              <Share2 className="w-3.5 h-3.5 text-blue-400" />
+              <Share2 className="w-3.5 h-3.5" />
               <span>Share</span>
             </Button>
             <a href={`/${profile.username}`} target="_blank" rel="noopener noreferrer">
@@ -186,7 +243,12 @@ export default function DashboardOverviewPage() {
 
       {/* 3. Quick Stats Bento */}
       <div>
-        <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+        <h3
+          className={clsx(
+            "text-xs font-semibold uppercase tracking-wider mb-3",
+            isDark ? "text-[#85796C]" : "text-[#8E8272]"
+          )}
+        >
           Performance Overview (Last 30 Days)
         </h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -198,21 +260,38 @@ export default function DashboardOverviewPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + i * 0.05 }}
-                className="p-4 sm:p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 hover:border-zinc-700/80 transition-all group"
+                className={clsx(
+                  "p-4 sm:p-5 rounded-2xl border transition-all group shadow-2xs",
+                  isDark
+                    ? "bg-[#1E1915] border-[#382F26] hover:border-[#4E4135]"
+                    : "bg-[#F6F0E4] border-[#E5DEC9] hover:border-[#DACBB4]"
+                )}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.border} border`}>
                     <Icon className={`w-4 h-4 ${stat.color}`} />
                   </div>
-                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <span
+                    className={clsx(
+                      "text-[11px] font-semibold px-2 py-0.5 rounded-full border",
+                      isDark
+                        ? "text-[#87B99B] bg-[#1C2820] border-[#2E4235]"
+                        : "text-[#48735A] bg-[#E2EDE5] border-[#C4DAC9]"
+                    )}
+                  >
                     {stat.change}
                   </span>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  <div className="text-xl sm:text-2xl font-serif font-bold tracking-tight">
                     {stat.value}
                   </div>
-                  <div className="text-xs text-zinc-400 mt-1">
+                  <div
+                    className={clsx(
+                      "text-xs mt-1",
+                      isDark ? "text-[#85796C]" : "text-[#786E62]"
+                    )}
+                  >
                     {stat.label}
                   </div>
                 </div>
@@ -224,7 +303,12 @@ export default function DashboardOverviewPage() {
 
       {/* 4. Quick Actions Grid */}
       <div>
-        <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+        <h3
+          className={clsx(
+            "text-xs font-semibold uppercase tracking-wider mb-3",
+            isDark ? "text-[#85796C]" : "text-[#8E8272]"
+          )}
+        >
           Quick Actions
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -232,11 +316,23 @@ export default function DashboardOverviewPage() {
             const Icon = action.icon;
             return (
               <Link key={action.label} href={action.href}>
-                <div className="p-3.5 rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/60 transition-all flex flex-col items-center text-center gap-2 group cursor-pointer">
-                  <div className={`p-2.5 rounded-xl text-white ${action.color} transition-transform group-hover:scale-110 shadow-md`}>
+                <div
+                  className={clsx(
+                    "p-3.5 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 group cursor-pointer shadow-2xs",
+                    isDark
+                      ? "bg-[#1E1915] border-[#382F26] hover:border-[#4E4135] hover:bg-[#26201B]"
+                      : "bg-[#F6F0E4] border-[#E5DEC9] hover:border-[#DACBB4] hover:bg-[#EFE7DA]"
+                  )}
+                >
+                  <div className={`p-2.5 rounded-xl ${action.color} transition-transform group-hover:scale-105 shadow-sm`}>
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-xs font-medium text-zinc-200 group-hover:text-white">
+                  <span
+                    className={clsx(
+                      "text-xs font-medium transition-colors",
+                      isDark ? "text-[#C8BDB0] group-hover:text-[#F4EFE6]" : "text-[#544B41] group-hover:text-[#1F1A16]"
+                    )}
+                  >
                     {action.label}
                   </span>
                 </div>
@@ -247,33 +343,71 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* 5. Real Recent Activity Feed */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-zinc-900/70 border border-zinc-800/80">
+      <div
+        className={clsx(
+          "p-5 sm:p-6 rounded-2xl border transition-colors shadow-2xs",
+          isDark
+            ? "bg-[#1E1915] border-[#382F26]"
+            : "bg-[#F6F0E4] border-[#E5DEC9]"
+        )}
+      >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-zinc-400" />
-            <h3 className="text-sm font-semibold text-white">Recent Activity</h3>
+            <Clock
+              className={clsx(
+                "w-4 h-4",
+                isDark ? "text-[#85796C]" : "text-[#8E8272]"
+              )}
+            />
+            <h3 className="text-sm font-serif font-semibold">Recent Activity</h3>
           </div>
-          <Link href="/dashboard/analytics" className="text-xs text-blue-400 hover:underline">
+          <Link
+            href="/dashboard/analytics"
+            className={clsx(
+              "text-xs hover:underline font-medium",
+              isDark ? "text-[#E6B86A]" : "text-[#967137]"
+            )}
+          >
             View Full Analytics
           </Link>
         </div>
 
         {activityLogs.length === 0 ? (
-          <p className="text-xs text-zinc-500 py-4 text-center">No recent activity logged yet.</p>
+          <p
+            className={clsx(
+              "text-xs py-4 text-center",
+              isDark ? "text-[#85796C]" : "text-[#8E8272]"
+            )}
+          >
+            No recent activity logged yet.
+          </p>
         ) : (
-          <div className="divide-y divide-zinc-800/60">
+          <div
+            className={clsx(
+              "divide-y",
+              isDark ? "divide-[#332B23]" : "divide-[#EAE2D3]"
+            )}
+          >
             {activityLogs.slice(0, 5).map((activity) => (
               <div key={activity.id} className="py-3 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${
-                    activity.type === 'link' ? 'bg-indigo-400' :
-                    activity.type === 'project' ? 'bg-emerald-400' :
-                    activity.type === 'theme' ? 'bg-pink-400' :
-                    activity.type === 'publish' ? 'bg-purple-400' : 'bg-blue-400'
-                  }`} />
-                  <span className="text-zinc-200">{activity.title}</span>
+                  <div className={clsx(
+                    "w-2 h-2 rounded-full",
+                    activity.type === 'link' ? (isDark ? 'bg-[#E6B86A]' : 'bg-[#967137]') :
+                    activity.type === 'project' ? 'bg-emerald-500' :
+                    activity.type === 'theme' ? 'bg-rose-500' :
+                    activity.type === 'publish' ? 'bg-purple-500' : 'bg-amber-500'
+                  )} />
+                  <span className={isDark ? "text-[#E2D8CC]" : "text-[#3D352E]"}>{activity.title}</span>
                 </div>
-                <span className="text-zinc-500 text-[11px] font-mono">{activity.time}</span>
+                <span
+                  className={clsx(
+                    "text-[11px] font-mono",
+                    isDark ? "text-[#85796C]" : "text-[#8E8272]"
+                  )}
+                >
+                  {activity.time}
+                </span>
               </div>
             ))}
           </div>

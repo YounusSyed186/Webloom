@@ -264,14 +264,18 @@ export function AudienceHomeReconstructed() {
 
           {/* Right Column: 5 Audience Categories Floating as Taped Paper Notes */}
           <motion.div
-            initial={isOverlay ? "visible" : "hidden"}
+            initial={isOverlay ? false : "hidden"}
             animate={isOverlay ? "visible" : undefined}
             whileInView={isOverlay ? undefined : "visible"}
             viewport={{ once: true, amount: 0.3 }}
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.075 } },
-            }}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: {},
+                    visible: { transition: { staggerChildren: 0.075 } },
+                  }
+            }
             style={{ transform: 'translateZ(42px)', transformStyle: 'preserve-3d' }}
             className={`lg:col-span-4 flex flex-col justify-center border-t lg:border-t-0 lg:border-l pt-5 lg:pt-1 lg:pl-7 ${
               isDark ? 'border-[#3B3027]/80' : 'border-[#D5C9B6]/80'
@@ -281,15 +285,21 @@ export function AudienceHomeReconstructed() {
               {AUDIENCES.map((item, idx) => (
                 <motion.div
                   key={idx}
-                  variants={{
-                    hidden: { opacity: 0, x: 18, rotateY: -10 },
-                    visible: {
-                      opacity: 1,
-                      x: 0,
-                      rotateY: 0,
-                      transition: { duration: 0.48, ease: [0.16, 1, 0.3, 1] },
-                    },
-                  }}
+                  initial={isOverlay ? false : undefined}
+                  animate={isOverlay ? { opacity: 1, x: 0, rotateY: 0 } : undefined}
+                  variants={
+                    isOverlay
+                      ? undefined
+                      : {
+                          hidden: { opacity: 0, x: 18, rotateY: -10 },
+                          visible: {
+                            opacity: 1,
+                            x: 0,
+                            rotateY: 0,
+                            transition: { duration: 0.48, ease: [0.16, 1, 0.3, 1] },
+                          },
+                        }
+                  }
                   whileHover={{
                     x: 6,
                     y: -2,

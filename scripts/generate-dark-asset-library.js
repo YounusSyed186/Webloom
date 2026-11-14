@@ -186,13 +186,13 @@ async function generateNocturnalPhoto(filename, outFilename, mode) {
       } else if (mode === 'monogram') {
         const inv = 1 - lum;
         const letterMask = smoothstep(0.35, 0.75, inv);
-        const grain = (lum - 0.85) * 28;
-        const paperR = 36 + grain;
-        const paperG = 26 + grain;
-        const paperB = 31 + grain;
-        nr = paperR * (1 - letterMask) + 243 * letterMask;
-        ng = paperG * (1 - letterMask) + 230 * letterMask;
-        nb = paperB * (1 - letterMask) + 218 * letterMask;
+        const grain = (lum - 0.85) * 36;
+        const paperR = 68 + grain;
+        const paperG = 48 + grain;
+        const paperB = 56 + grain;
+        nr = paperR * (1 - letterMask) + 248 * letterMask;
+        ng = paperG * (1 - letterMask) + 236 * letterMask;
+        nb = paperB * (1 - letterMask) + 224 * letterMask;
       } else if (mode === 'daisy') {
         const curve = Math.pow(lum, 1.18);
         const yellowWeight =
@@ -258,8 +258,8 @@ async function generateDarkDeckleCard(filename, outFilename, palette) {
     }
 
     const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    const grainDelta = (lum - 0.84) * 52;
-    const edgeRim = a < 245 ? (1 - a / 255) * 28 : 0;
+    const grainDelta = (lum - 0.84) * 64;
+    const edgeRim = a < 250 ? (1 - a / 255) * 68 : 0;
 
     out[i] = clamp(palette.r + grainDelta + edgeRim);
     out[i + 1] = clamp(palette.g + grainDelta + edgeRim);
@@ -505,10 +505,10 @@ async function main() {
   await generateNocturnalPhoto('thumb-wave.jpg', 'thumb-wave-dark.jpg', 'wave');
   await generateNocturnalPhoto('botanical-leaves-dark.jpg', 'botanical-leaves-night.jpg', 'botanical-night');
 
-  await generateDarkDeckleCard('card-sage-hd.png', 'card-sage-dark.png', { r: 32, g: 42, b: 35 });
-  await generateDarkDeckleCard('card-peach-hd.png', 'card-peach-dark.png', { r: 46, g: 33, b: 28 });
-  await generateDarkDeckleCard('card-lavender-hd.png', 'card-lavender-dark.png', { r: 39, g: 32, b: 47 });
-  await generateDarkDeckleCard('card-sand-hd.png', 'card-sand-dark.png', { r: 40, g: 34, b: 28 });
+  await generateDarkDeckleCard('card-sage-hd.png', 'card-sage-dark.png', { r: 68, g: 98, b: 80 });
+  await generateDarkDeckleCard('card-peach-hd.png', 'card-peach-dark.png', { r: 118, g: 78, b: 66 });
+  await generateDarkDeckleCard('card-lavender-hd.png', 'card-lavender-dark.png', { r: 96, g: 76, b: 110 });
+  await generateDarkDeckleCard('card-sand-hd.png', 'card-sand-dark.png', { r: 104, g: 88, b: 68 });
   await generateDarkLavenderRibbon();
   await generateDarkAudienceDiorama();
 

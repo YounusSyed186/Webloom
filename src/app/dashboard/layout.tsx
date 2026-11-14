@@ -6,6 +6,7 @@ import { Topbar } from '@/components/dashboard/topbar';
 import { LivePreview } from '@/components/dashboard/live-preview';
 import { MobileNav } from '@/components/dashboard/mobile-nav';
 import { CommandMenu } from '@/components/ui/command-menu';
+import { useApp } from '@/lib/context/app-context';
 
 export default function DashboardLayout({
   children,
@@ -13,9 +14,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { themeMode } = useApp();
+  const isDark = themeMode === 'dark';
 
   return (
-    <div className="flex h-screen bg-zinc-950 text-zinc-100 overflow-hidden font-geist">
+    <div
+      className={`flex h-screen overflow-hidden transition-colors duration-200 ${
+        isDark ? 'dark bg-[#161310] text-[#F4EFE6]' : 'bg-[#FAF6EE] text-[#1F1A16]'
+      }`}
+    >
       {/* 1. Desktop Sidebar */}
       <Sidebar />
 
@@ -25,7 +32,11 @@ export default function DashboardLayout({
       {/* 3. Main Center Workspace */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Topbar onMobileMenuToggle={() => setMobileMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
+        <main
+          className={`flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 transition-colors duration-200 ${
+            isDark ? 'bg-[#161310]' : 'bg-[#FAF6EE]'
+          }`}
+        >
           <div className="max-w-4xl mx-auto space-y-6">
             {children}
           </div>

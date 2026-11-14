@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import type { WebloomThemeMode } from '@/lib/webloom-theme-assets';
+import { useApp } from '@/lib/context/app-context';
 
 interface WebloomThemeContextValue {
   theme: WebloomThemeMode;
@@ -64,6 +65,8 @@ interface WebloomSyncStateValue {
   // Pricing section state
   billingCycle: 'annual' | 'monthly';
   setBillingCycle: React.Dispatch<React.SetStateAction<'annual' | 'monthly'>>;
+  currency: 'USD' | 'INR';
+  setCurrency: React.Dispatch<React.SetStateAction<'USD' | 'INR'>>;
 
   // FAQ section state
   openFaqIdx: number | null;
@@ -75,7 +78,7 @@ interface WebloomSyncStateValue {
 
   // Dark/Light Theme Mode toggle
   themeMode: 'light' | 'dark';
-  setThemeMode: React.Dispatch<React.SetStateAction<'light' | 'dark'>>;
+  setThemeMode: (mode: 'light' | 'dark') => void;
   toggleThemeMode: () => void;
 }
 
@@ -100,13 +103,10 @@ export function WebloomSyncStateProvider({
   const [claimHandle, setClaimHandle] = useState<string>('ayaan');
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [billingCycle, setBillingCycle] = useState<'annual' | 'monthly'>('annual');
+  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
-
-  const toggleThemeMode = () => {
-    setThemeMode((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
+  const { themeMode, setThemeMode, toggleThemeMode } = useApp();
 
   const toggleNote = (item: string) => {
     setCheckedNotes((prev) => ({ ...prev, [item]: !prev[item] }));
@@ -134,6 +134,8 @@ export function WebloomSyncStateProvider({
         triggerCopyLink,
         billingCycle,
         setBillingCycle,
+        currency,
+        setCurrency,
         openFaqIdx,
         setOpenFaqIdx,
         hoveredNav,

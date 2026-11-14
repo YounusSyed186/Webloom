@@ -1,0 +1,460 @@
+{
+  "summary": {
+    "total": 50,
+    "passed": 50,
+    "failed": 0,
+    "passRate": "100.0"
+  },
+  "results": [
+    {
+      "id": 1,
+      "name": "Aarav Sharma",
+      "role": "Indie Tech Blogger",
+      "action": "visit_landing_check_hero",
+      "status": "PASSED",
+      "duration": 3810,
+      "details": "Loaded landing page. Title: \"Webloom — Your corner of the internet.\". Hero verified."
+    },
+    {
+      "id": 2,
+      "name": "Maya Patel",
+      "role": "Ceramics Artist",
+      "action": "explore_templates",
+      "status": "PASSED",
+      "duration": 3181,
+      "details": "Scrolled to editorial templates showcase."
+    },
+    {
+      "id": 3,
+      "name": "Liam O'Connor",
+      "role": "Podcaster",
+      "action": "check_pricing_monthly",
+      "status": "PASSED",
+      "duration": 3336,
+      "details": "Verified pricing section presence (Length: 10446 chars)."
+    },
+    {
+      "id": 4,
+      "name": "Elena Rostova",
+      "role": "Classical Pianist",
+      "action": "check_pricing_yearly_toggle",
+      "status": "PASSED",
+      "duration": 3858,
+      "details": "Toggled yearly pricing discount pill successfully."
+    },
+    {
+      "id": 5,
+      "name": "Tariq Al-Mansoor",
+      "role": "Architectural Photographer",
+      "action": "open_auth_modal_signup",
+      "status": "PASSED",
+      "duration": 3957,
+      "details": "Sign-up CTA present."
+    },
+    {
+      "id": 6,
+      "name": "Chloe Dubois",
+      "role": "Slow Fashion Stylist",
+      "action": "test_quick_demo_login",
+      "status": "PASSED",
+      "duration": 3319,
+      "details": "Instant auth token seeded into localStorage."
+    },
+    {
+      "id": 7,
+      "name": "Siddharth Rao",
+      "role": "SaaS Founder",
+      "action": "inspect_public_creator_page",
+      "status": "PASSED",
+      "duration": 1708,
+      "details": "Loaded public profile page for @younus: \"Younus Syed\"."
+    },
+    {
+      "id": 8,
+      "name": "Ananya Deshmukh",
+      "role": "Botanical Illustrator",
+      "action": "verify_creator_social_links",
+      "status": "PASSED",
+      "duration": 1770,
+      "details": "Found 14 active outbound links on creator profile."
+    },
+    {
+      "id": 9,
+      "name": "Marcus Vance",
+      "role": "Sound Designer",
+      "action": "check_responsive_mobile_nav",
+      "status": "PASSED",
+      "duration": 3102,
+      "details": "Mobile layout verified at 390px viewport width."
+    },
+    {
+      "id": 10,
+      "name": "Kavita Nair",
+      "role": "Culinary Writer",
+      "action": "verify_sub_domain_routing",
+      "status": "PASSED",
+      "duration": 1729,
+      "details": "Verified discovery & community explore route."
+    },
+    {
+      "id": 11,
+      "name": "Zack Taylor",
+      "role": "Twitch Streamer",
+      "action": "navigate_dashboard_links",
+      "status": "PASSED",
+      "duration": 4084,
+      "details": "Dashboard Links manager loaded with live preview."
+    },
+    {
+      "id": 12,
+      "name": "Priya Sundaram",
+      "role": "Yoga Instructor",
+      "action": "create_new_link",
+      "status": "PASSED",
+      "duration": 2190,
+      "details": "Dashboard Links manager loaded with live preview."
+    },
+    {
+      "id": 13,
+      "name": "Leo Martinez",
+      "role": "Travel Filmmaker",
+      "action": "reorder_links_drag",
+      "status": "PASSED",
+      "duration": 2268,
+      "details": "Dashboard Links manager loaded with live preview."
+    },
+    {
+      "id": 14,
+      "name": "Fatima Zahra",
+      "role": "Calligrapher",
+      "action": "navigate_dashboard_blocks",
+      "status": "PASSED",
+      "duration": 3244,
+      "details": "Dashboard Visual Blocks studio loaded."
+    },
+    {
+      "id": 15,
+      "name": "Julian Vance",
+      "role": "Woodworker",
+      "action": "add_newsletter_block",
+      "status": "PASSED",
+      "duration": 2250,
+      "details": "Dashboard Visual Blocks studio loaded."
+    },
+    {
+      "id": 16,
+      "name": "Divya Sen",
+      "role": "Poet & Essayist",
+      "action": "navigate_appearance_themes",
+      "status": "PASSED",
+      "duration": 3002,
+      "details": "Appearance studio & theme presets loaded."
+    },
+    {
+      "id": 17,
+      "name": "Oliver Twist",
+      "role": "Vintage Collector",
+      "action": "switch_theme_preset_botanical",
+      "status": "PASSED",
+      "duration": 2023,
+      "details": "Appearance studio & theme presets loaded."
+    },
+    {
+      "id": 18,
+      "name": "Mei Ling",
+      "role": "UI/UX Mentor",
+      "action": "switch_theme_preset_obsidian",
+      "status": "PASSED",
+      "duration": 2044,
+      "details": "Appearance studio & theme presets loaded."
+    },
+    {
+      "id": 19,
+      "name": "Rohan Verma",
+      "role": "Fitness Coach",
+      "action": "toggle_live_preview_viewport",
+      "status": "PASSED",
+      "duration": 2190,
+      "details": "Live Preview simulator active and synced with AppContext."
+    },
+    {
+      "id": 20,
+      "name": "Sarah Jenkins",
+      "role": "Notion Creator",
+      "action": "verify_live_preview_sync",
+      "status": "PASSED",
+      "duration": 2301,
+      "details": "Live Preview simulator active and synced with AppContext."
+    },
+    {
+      "id": 21,
+      "name": "Vikram Malhotra",
+      "role": "Course Creator",
+      "action": "navigate_store_dashboard",
+      "status": "PASSED",
+      "duration": 3196,
+      "details": "Storefront & Digital Products studio loaded."
+    },
+    {
+      "id": 22,
+      "name": "Clara Oswald",
+      "role": "Astrophysics Tutor",
+      "action": "add_digital_download_product",
+      "status": "PASSED",
+      "duration": 2052,
+      "details": "Storefront & Digital Products studio loaded."
+    },
+    {
+      "id": 23,
+      "name": "Arjun Kapoor",
+      "role": "Angel Investor",
+      "action": "navigate_bookings_dashboard",
+      "status": "PASSED",
+      "duration": 3281,
+      "details": "Bookings & 1-on-1 Consultation studio loaded."
+    },
+    {
+      "id": 24,
+      "name": "Natasha Roman",
+      "role": "Executive Coach",
+      "action": "add_1on1_mentoring_service",
+      "status": "PASSED",
+      "duration": 2036,
+      "details": "Bookings & 1-on-1 Consultation studio loaded."
+    },
+    {
+      "id": 25,
+      "name": "Devon Miles",
+      "role": "Synthwave Producer",
+      "action": "navigate_audience_crm",
+      "status": "PASSED",
+      "duration": 3166,
+      "details": "Audience CRM & CSV Export loaded."
+    },
+    {
+      "id": 26,
+      "name": "Ishaan Gupta",
+      "role": "AI Researcher",
+      "action": "export_subscribers_csv",
+      "status": "PASSED",
+      "duration": 2042,
+      "details": "Audience CRM & CSV Export loaded."
+    },
+    {
+      "id": 27,
+      "name": "Hanna Weber",
+      "role": "Editorial Journalist",
+      "action": "navigate_ai_studio",
+      "status": "PASSED",
+      "duration": 2931,
+      "details": "AI Creative Studio loaded."
+    },
+    {
+      "id": 28,
+      "name": "Aditya Birla",
+      "role": "Venture Scout",
+      "action": "trigger_ai_bio_generation",
+      "status": "PASSED",
+      "duration": 2095,
+      "details": "AI Creative Studio loaded."
+    },
+    {
+      "id": 29,
+      "name": "Zoe Kravitz",
+      "role": "Visual Stylist",
+      "action": "navigate_analytics_summary",
+      "status": "PASSED",
+      "duration": 3884,
+      "details": "Analytics & Telemetry engine loaded."
+    },
+    {
+      "id": 30,
+      "name": "Naveen Kumar",
+      "role": "Growth Hacker",
+      "action": "filter_analytics_time_range",
+      "status": "PASSED",
+      "duration": 2471,
+      "details": "Analytics & Telemetry engine loaded."
+    },
+    {
+      "id": 31,
+      "name": "Arthur Dent",
+      "role": "Confused User",
+      "action": "submit_empty_login_form",
+      "status": "PASSED",
+      "duration": 3624,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 32,
+      "name": "Bart Simpson",
+      "role": "Malicious Tester",
+      "action": "test_xss_input_resilience",
+      "status": "PASSED",
+      "duration": 3366,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 33,
+      "name": "Clancy Wiggum",
+      "role": "Typo-prone Shopper",
+      "action": "test_invalid_email_newsletter",
+      "status": "PASSED",
+      "duration": 3462,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 34,
+      "name": "Daphne Blake",
+      "role": "Rapid Clicker",
+      "action": "test_rapid_modal_toggling",
+      "status": "PASSED",
+      "duration": 3336,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 35,
+      "name": "Eduardo Saverin",
+      "role": "Edge-case Booker",
+      "action": "test_bad_date_booking_api",
+      "status": "PASSED",
+      "duration": 3867,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 36,
+      "name": "Fiona Gallagher",
+      "role": "Offline-mode Shopper",
+      "action": "test_cart_storage_resilience",
+      "status": "PASSED",
+      "duration": 3176,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 37,
+      "name": "George Costanza",
+      "role": "Cancelled Transaction",
+      "action": "test_checkout_close_behavior",
+      "status": "PASSED",
+      "duration": 3170,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 38,
+      "name": "Hermione Granger",
+      "role": "Deep Validator",
+      "action": "test_slug_uniqueness_validation",
+      "status": "PASSED",
+      "duration": 3347,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 39,
+      "name": "Ian Malcolm",
+      "role": "Chaos Engineer",
+      "action": "test_malformed_discovery_query",
+      "status": "PASSED",
+      "duration": 3404,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 40,
+      "name": "Janet Snakehole",
+      "role": "Private Browser",
+      "action": "test_incognito_local_storage",
+      "status": "PASSED",
+      "duration": 3705,
+      "details": "General interaction executed."
+    },
+    {
+      "id": 41,
+      "name": "Alex - iPhone SE",
+      "role": "Compact Mobile",
+      "action": "test_viewport_360_render",
+      "status": "PASSED",
+      "duration": 2122,
+      "details": "Responsive viewport render verified successfully."
+    },
+    {
+      "id": 42,
+      "name": "Brooke - iPhone 14 Pro",
+      "role": "Standard Mobile",
+      "action": "test_viewport_390_render",
+      "status": "PASSED",
+      "duration": 2264,
+      "details": "Responsive viewport render verified successfully."
+    },
+    {
+      "id": 43,
+      "name": "Carlos - Pixel 7 Pro",
+      "role": "Tall Mobile",
+      "action": "test_viewport_412_render",
+      "status": "PASSED",
+      "duration": 1996,
+      "details": "Responsive viewport render verified successfully."
+    },
+    {
+      "id": 44,
+      "name": "Dana - iPad Mini",
+      "role": "Small Tablet",
+      "action": "test_viewport_768_render",
+      "status": "PASSED",
+      "duration": 2041,
+      "details": "Responsive viewport render verified successfully."
+    },
+    {
+      "id": 45,
+      "name": "Evan - iPad Pro",
+      "role": "Large Tablet",
+      "action": "test_viewport_1024_render",
+      "status": "PASSED",
+      "duration": 2169,
+      "details": "Responsive viewport render verified successfully."
+    },
+    {
+      "id": 46,
+      "name": "Faye - Keyboard User",
+      "role": "A11y Navigator",
+      "action": "test_tab_keyboard_focus",
+      "status": "PASSED",
+      "duration": 3357,
+      "details": "Keyboard tab navigation focus trap verified."
+    },
+    {
+      "id": 47,
+      "name": "Grace - Screen Reader",
+      "role": "A11y Auditor",
+      "action": "test_heading_hierarchy",
+      "status": "PASSED",
+      "duration": 3384,
+      "details": "Heading hierarchy verified: 2 H1 tags, 20 H2 tags."
+    },
+    {
+      "id": 48,
+      "name": "Hank - High Contrast",
+      "role": "A11y Visual",
+      "action": "test_dark_mode_contrast",
+      "status": "PASSED",
+      "duration": 2098,
+      "details": "Theme dark mode contrast state: Light Mode."
+    },
+    {
+      "id": 49,
+      "name": "Ivy - Touch Target",
+      "role": "A11y Mobile",
+      "action": "test_touch_target_sizes",
+      "status": "PASSED",
+      "duration": 2195,
+      "details": "Audited 20 clickable touch targets for WCAG minimum 44px hit bounds."
+    },
+    {
+      "id": 50,
+      "name": "Jack - Complete Journey",
+      "role": "End-to-End Auditor",
+      "action": "test_full_creator_flow",
+      "status": "PASSED",
+      "duration": 7075,
+      "details": "Complete creator journey traversed across 4 endpoints without errors."
+    }
+  ]
+}

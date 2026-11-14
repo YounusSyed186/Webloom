@@ -17,16 +17,16 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const baseStyles = "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:pointer-events-none disabled:opacity-50 select-none active:scale-[0.98]";
+  const baseStyles = "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C89D54]/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none active:scale-[0.98] cursor-pointer";
 
   const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-600/20 hover:shadow-blue-500/30",
-    secondary: "bg-zinc-800 text-zinc-100 hover:bg-zinc-700/80 border border-zinc-700/60 shadow-sm",
-    outline: "bg-transparent text-zinc-200 hover:bg-zinc-800/60 border border-zinc-700/80 hover:border-zinc-600",
-    ghost: "bg-transparent text-zinc-300 hover:bg-zinc-800/60 hover:text-zinc-100",
-    glass: "bg-white/10 backdrop-blur-md text-white border border-white/15 hover:bg-white/15 hover:border-white/25 shadow-lg",
-    danger: "bg-red-600 text-white hover:bg-red-500 shadow-md shadow-red-600/20",
-    gradient: "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white hover:opacity-95 shadow-lg shadow-indigo-500/25",
+    primary: "bg-[#1F1A16] text-[#FAF6EE] hover:bg-black dark:bg-[#E6B86A] dark:text-[#181410] dark:hover:bg-[#F2C97E] shadow-sm",
+    secondary: "bg-[#EAE2D3] text-[#1F1A16] hover:bg-[#DFD5C4] border border-[#DACBB4] dark:bg-[#26201B] dark:text-[#F4EFE6] dark:hover:bg-[#342B24] dark:border-[#3E342A] shadow-xs",
+    outline: "bg-transparent text-[#1F1A16] hover:bg-[#F6F0E4] border border-[#DACBB4] dark:text-[#F4EFE6] dark:hover:bg-[#26201B] dark:border-[#3E342A]",
+    ghost: "bg-transparent text-[#544B41] hover:bg-[#EAE2D3]/60 hover:text-[#1F1A16] dark:text-[#A89F91] dark:hover:bg-[#26201B] dark:hover:text-[#F4EFE6]",
+    glass: "bg-[#F6F0E4]/80 backdrop-blur-md text-[#1F1A16] border border-[#DACBB4]/60 hover:bg-[#F6F0E4] dark:bg-[#26201B]/80 dark:text-[#F4EFE6] dark:border-[#3E342A]/60 shadow-sm",
+    danger: "bg-red-600 text-white hover:bg-red-500 shadow-sm",
+    gradient: "bg-gradient-to-r from-[#C89D54] to-[#E6B86A] text-[#181410] font-semibold hover:opacity-95 shadow-sm",
   };
 
   const sizes = {

@@ -10,10 +10,29 @@ import {
   PublicProfileData, 
   AnalyticsEvent, 
   ActivityItem,
-  User 
+  User,
+  PageBlock,
+  Product,
+  Order,
+  Subscriber,
+  Service,
+  Booking
 } from '@/types';
 import { DEFAULT_APPEARANCE, THEME_PRESETS } from './themes';
-import { INITIAL_ANALYTICS, INITIAL_APPEARANCE, INITIAL_LINKS, INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_SOCIAL_LINKS } from './mock-data';
+import { 
+  INITIAL_ANALYTICS, 
+  INITIAL_APPEARANCE, 
+  INITIAL_LINKS, 
+  INITIAL_PROFILE, 
+  INITIAL_PROJECTS, 
+  INITIAL_SOCIAL_LINKS,
+  INITIAL_BLOCKS,
+  INITIAL_PRODUCTS,
+  INITIAL_ORDERS,
+  INITIAL_SUBSCRIBERS,
+  INITIAL_SERVICES,
+  INITIAL_BOOKINGS
+} from './mock-data';
 import { supabase } from './supabase/client';
 import { aggregateAnalytics } from './analytics';
 import { normalizeUsername, validateUsername } from './validation';
@@ -25,6 +44,12 @@ const KEYS = {
   USERS: `${STORAGE_PREFIX}users`,
   PROFILES: `${STORAGE_PREFIX}profiles`,
   LINKS: `${STORAGE_PREFIX}links`,
+  BLOCKS: `${STORAGE_PREFIX}blocks`,
+  PRODUCTS: `${STORAGE_PREFIX}products`,
+  ORDERS: `${STORAGE_PREFIX}orders`,
+  SUBSCRIBERS: `${STORAGE_PREFIX}subscribers`,
+  SERVICES: `${STORAGE_PREFIX}services`,
+  BOOKINGS: `${STORAGE_PREFIX}bookings`,
   SOCIAL_LINKS: `${STORAGE_PREFIX}social_links`,
   PROJECTS: `${STORAGE_PREFIX}projects`,
   APPEARANCE: `${STORAGE_PREFIX}appearance`,
@@ -104,6 +129,24 @@ export class LinkedTreeStore {
       const appearanceMap = this.getStored<Record<string, AppearanceSettings>>(KEYS.APPEARANCE, {});
       appearanceMap[INITIAL_PROFILE.id] = INITIAL_APPEARANCE;
 
+      const blocksMap = this.getStored<Record<string, PageBlock[]>>(KEYS.BLOCKS, {});
+      blocksMap[INITIAL_PROFILE.id] = INITIAL_BLOCKS;
+
+      const productsMap = this.getStored<Record<string, Product[]>>(KEYS.PRODUCTS, {});
+      productsMap[INITIAL_PROFILE.id] = INITIAL_PRODUCTS;
+
+      const ordersMap = this.getStored<Record<string, Order[]>>(KEYS.ORDERS, {});
+      ordersMap[INITIAL_PROFILE.id] = INITIAL_ORDERS;
+
+      const subscribersMap = this.getStored<Record<string, Subscriber[]>>(KEYS.SUBSCRIBERS, {});
+      subscribersMap[INITIAL_PROFILE.id] = INITIAL_SUBSCRIBERS;
+
+      const servicesMap = this.getStored<Record<string, Service[]>>(KEYS.SERVICES, {});
+      servicesMap[INITIAL_PROFILE.id] = INITIAL_SERVICES;
+
+      const bookingsMap = this.getStored<Record<string, Booking[]>>(KEYS.BOOKINGS, {});
+      bookingsMap[INITIAL_PROFILE.id] = INITIAL_BOOKINGS;
+
       // Seed initial analytics events over 30 days
       const events: AnalyticsEvent[] = [];
       const now = Date.now();
@@ -148,6 +191,12 @@ export class LinkedTreeStore {
       this.setStored(KEYS.USERS, allUsers);
       this.setStored(KEYS.PROFILES, profiles);
       this.setStored(KEYS.LINKS, linksMap);
+      this.setStored(KEYS.BLOCKS, blocksMap);
+      this.setStored(KEYS.PRODUCTS, productsMap);
+      this.setStored(KEYS.ORDERS, ordersMap);
+      this.setStored(KEYS.SUBSCRIBERS, subscribersMap);
+      this.setStored(KEYS.SERVICES, servicesMap);
+      this.setStored(KEYS.BOOKINGS, bookingsMap);
       this.setStored(KEYS.SOCIAL_LINKS, socialsMap);
       this.setStored(KEYS.PROJECTS, projectsMap);
       this.setStored(KEYS.APPEARANCE, appearanceMap);
@@ -184,61 +233,64 @@ export class LinkedTreeStore {
     this.setStored(KEYS.APPEARANCE, appearanceMap);
   }
 
-  public static signupOrLogin(email: string, username?: string, displayName?: string): { user: User; profile: Profile } {
+  // --- AUTHENTICATION & SESSIONS ---
+  public static login(email: string, password?: string): { user: User; profile: Profile } {
     this.ensureInitialized();
+    const cleanEmail = email.trim().toLowerCase();
     const users = this.getStored<Record<string, User>>(KEYS.USERS, {});
     const profiles = this.getStored<Record<string, Profile>>(KEYS.PROFILES, {});
 
-    const isDemoEmail = email.toLowerCase() === 'demo@webloom.site' || email.toLowerCase() === 'hello@younus.dev';
-
-    // Check if user with this email exists
-    const existingUser = Object.values(users).find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (existingUser) {
-      let userProfile = Object.values(profiles).find(p => p.userId === existingUser.id);
-      if (!userProfile) {
-        userProfile = { ...INITIAL_PROFILE, userId: existingUser.id };
-        profiles[userProfile.id] = userProfile;
-        this.setStored(KEYS.PROFILES, profiles);
+    // Check for demo account
+    if (cleanEmail === 'demo@webloom.site') {
+      if (password && password !== 'demo123456') {
+        throw new Error('Incorrect password for demo account. Please use "demo123456" or click Launch Demo.');
       }
-      
-      // If demo email and links are empty, populate demo seed data
-      const linksMap = this.getStored<Record<string, Link[]>>(KEYS.LINKS, {});
-      if (isDemoEmail && (!linksMap[userProfile.id] || linksMap[userProfile.id].length === 0)) {
-        this.seedDemoData(userProfile.id);
-      }
-
-      this.setCurrentUser(existingUser);
-      return { user: existingUser, profile: userProfile };
+      return this.loginDemo();
     }
 
-    // If demo email requested for first time, reuse INITIAL_PROFILE
-    if (isDemoEmail) {
-      const demoUser: User = {
-        id: INITIAL_PROFILE.userId,
-        email: 'demo@webloom.site',
-        name: INITIAL_PROFILE.displayName,
-        username: INITIAL_PROFILE.username,
-        avatar: INITIAL_PROFILE.avatar,
-        createdAt: '2026-01-15T10:00:00Z',
-        updatedAt: '2026-10-08T04:00:00Z',
-      };
-      users[demoUser.id] = demoUser;
-      profiles[INITIAL_PROFILE.id] = INITIAL_PROFILE;
-      this.setStored(KEYS.USERS, users);
+    // Check existing registered users
+    const existingUser = Object.values(users).find(u => u.email.toLowerCase() === cleanEmail);
+    if (!existingUser) {
+      throw new Error(`No account found for "${email}". Please check your email or click "Create your Webloom" to register.`);
+    }
+
+    let userProfile = Object.values(profiles).find(p => p.userId === existingUser.id);
+    if (!userProfile) {
+      userProfile = { ...INITIAL_PROFILE, userId: existingUser.id };
+      profiles[userProfile.id] = userProfile;
       this.setStored(KEYS.PROFILES, profiles);
-      this.seedDemoData(INITIAL_PROFILE.id);
-      this.setCurrentUser(demoUser);
-      return { user: demoUser, profile: INITIAL_PROFILE };
     }
 
-    // Create brand new user & profile
-    const userId = `user_${Date.now()}`;
-    const cleanHandle = normalizeUsername(username || email.split('@')[0]);
+    this.setCurrentUser(existingUser);
+    return { user: existingUser, profile: userProfile };
+  }
+
+  public static signup(email: string, password?: string, username?: string, displayName?: string): { user: User; profile: Profile } {
+    this.ensureInitialized();
+    const cleanEmail = email.trim().toLowerCase();
+    const users = this.getStored<Record<string, User>>(KEYS.USERS, {});
+    const profiles = this.getStored<Record<string, Profile>>(KEYS.PROFILES, {});
+
+    // Prevent duplicate email registration
+    const existingUser = Object.values(users).find(u => u.email.toLowerCase() === cleanEmail);
+    if (existingUser) {
+      throw new Error(`An account with email "${email}" already exists. Please sign in instead.`);
+    }
+
+    const cleanHandle = normalizeUsername(username || cleanEmail.split('@')[0]);
+
+    // Prevent duplicate username
+    const existingProfile = Object.values(profiles).find(p => p.username.toLowerCase() === cleanHandle.toLowerCase());
+    if (existingProfile) {
+      throw new Error(`The handle "@${cleanHandle}" is already taken. Please choose another username.`);
+    }
+
     const name = displayName || cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1);
+    const userId = `user_${Date.now()}`;
 
     const newUser: User = {
       id: userId,
-      email: email.toLowerCase(),
+      email: cleanEmail,
       name,
       username: cleanHandle,
       createdAt: new Date().toISOString(),
@@ -266,43 +318,8 @@ export class LinkedTreeStore {
       profileId: newProfile.id,
     };
 
-    users[newUser.id] = newUser;
-    profiles[newProfile.id] = newProfile;
-
-    // Give new users starter sample links so their dashboard is immediately responsive and beautiful
-    const linksMap = this.getStored<Record<string, Link[]>>(KEYS.LINKS, {});
-    linksMap[newProfile.id] = [
-      {
-        id: `link_${Date.now()}_1`,
-        profileId: newProfile.id,
-        title: 'My Website / Portfolio',
-        description: 'Check out my latest work and case studies.',
-        url: 'https://webloom.site/' + cleanHandle,
-        icon: 'Globe',
-        type: 'url',
-        isActive: true,
-        sortOrder: 0,
-        clickCount: 12,
-        openInNewTab: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: `link_${Date.now()}_2`,
-        profileId: newProfile.id,
-        title: 'Follow me on X (Twitter)',
-        description: 'Updates, thoughts, and builds.',
-        url: 'https://x.com/' + cleanHandle,
-        icon: 'X',
-        type: 'social',
-        isActive: true,
-        sortOrder: 1,
-        clickCount: 8,
-        openInNewTab: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-    ];
+    const appearanceMap = this.getStored<Record<string, AppearanceSettings>>(KEYS.APPEARANCE, {});
+    appearanceMap[newProfile.id] = newAppearance;
 
     const socialsMap = this.getStored<Record<string, SocialLink[]>>(KEYS.SOCIAL_LINKS, {});
     socialsMap[newProfile.id] = [
@@ -313,20 +330,81 @@ export class LinkedTreeStore {
     const projectsMap = this.getStored<Record<string, Project[]>>(KEYS.PROJECTS, {});
     projectsMap[newProfile.id] = [];
 
-    const appearanceMap = this.getStored<Record<string, AppearanceSettings>>(KEYS.APPEARANCE, {});
-    appearanceMap[newProfile.id] = newAppearance;
-
+    users[newUser.id] = newUser;
+    profiles[newProfile.id] = newProfile;
     this.setStored(KEYS.USERS, users);
     this.setStored(KEYS.PROFILES, profiles);
-    this.setStored(KEYS.LINKS, linksMap);
+    this.setStored(KEYS.APPEARANCE, appearanceMap);
     this.setStored(KEYS.SOCIAL_LINKS, socialsMap);
     this.setStored(KEYS.PROJECTS, projectsMap);
-    this.setStored(KEYS.APPEARANCE, appearanceMap);
+
+    // Initial links for new creator
+    const linksMap = this.getStored<Record<string, Link[]>>(KEYS.LINKS, {});
+    linksMap[newProfile.id] = [
+      {
+        id: `link_${Date.now()}_1`,
+        profileId: newProfile.id,
+        title: 'My Latest Project',
+        description: 'Explore my featured work and updates',
+        url: 'https://github.com',
+        type: 'url',
+        isActive: true,
+        sortOrder: 0,
+        clickCount: 0,
+        openInNewTab: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+    this.setStored(KEYS.LINKS, linksMap);
+
     this.setCurrentUser(newUser);
-
-    this.addActivityLog(newProfile.id, 'Account created and profile initialized', 'profile');
-
     return { user: newUser, profile: newProfile };
+  }
+
+  public static loginDemo(): { user: User; profile: Profile } {
+    this.ensureInitialized();
+    const users = this.getStored<Record<string, User>>(KEYS.USERS, {});
+    const profiles = this.getStored<Record<string, Profile>>(KEYS.PROFILES, {});
+
+    const demoUser: User = {
+      id: 'user_demo_1',
+      email: 'demo@webloom.site',
+      name: 'Demo Creator',
+      username: 'demo',
+      avatar: INITIAL_PROFILE.avatar,
+      createdAt: '2026-01-15T10:00:00Z',
+      updatedAt: '2026-10-08T04:00:00Z',
+    };
+
+    const demoProfile: Profile = {
+      ...INITIAL_PROFILE,
+      id: 'profile_demo_1',
+      userId: demoUser.id,
+      username: 'demo',
+      displayName: 'Demo Creator',
+      email: 'demo@webloom.site',
+      headline: 'Product Designer & Independent Builder',
+      bio: 'Welcome to my interactive Webloom space! Explore my digital tools, store templates, and consultation slots.',
+      isPublished: true,
+      seoIndexing: true,
+    };
+
+    users[demoUser.id] = demoUser;
+    profiles[demoProfile.id] = demoProfile;
+    this.setStored(KEYS.USERS, users);
+    this.setStored(KEYS.PROFILES, profiles);
+    this.seedDemoData(demoProfile.id);
+    this.setCurrentUser(demoUser);
+    return { user: demoUser, profile: demoProfile };
+  }
+
+  public static signupOrLogin(email: string, username?: string, displayName?: string): { user: User; profile: Profile } {
+    try {
+      return this.login(email);
+    } catch {
+      return this.signup(email, undefined, username, displayName);
+    }
   }
 
   // --- PROFILE CRUD ---
@@ -357,6 +435,13 @@ export class LinkedTreeStore {
 
     // Sync to Supabase in background
     this.syncProfileToSupabase(profile);
+  }
+
+  public static updateProfile(profileId: string, partial: Partial<Profile>): Profile {
+    const cur = this.getProfile(profileId);
+    const updated = { ...cur, ...partial, updatedAt: new Date().toISOString() };
+    this.setProfile(updated);
+    return updated;
   }
 
   // --- LINKS CRUD ---
@@ -429,6 +514,346 @@ export class LinkedTreeStore {
     this.setStored(KEYS.APPEARANCE, appearanceMap);
 
     this.syncAppearanceToSupabase(appearanceMap[pid]);
+  }
+
+  // --- BLOCKS CRUD (Block-Based Architecture) ---
+  public static getBlocks(profileId?: string): PageBlock[] {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const blocksMap = this.getStored<Record<string, PageBlock[]>>(KEYS.BLOCKS, {});
+    return (blocksMap[pid] || []).sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+
+  public static setBlocks(blocks: PageBlock[], profileId?: string): void {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const blocksMap = this.getStored<Record<string, PageBlock[]>>(KEYS.BLOCKS, {});
+    blocksMap[pid] = blocks;
+    this.setStored(KEYS.BLOCKS, blocksMap);
+  }
+
+  public static addBlock(blockData: Partial<PageBlock>, profileId?: string): PageBlock {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentBlocks = this.getBlocks(pid);
+    const newBlock: PageBlock = {
+      id: blockData.id || `blk_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      profileId: pid,
+      blockType: blockData.blockType || 'link',
+      title: blockData.title || 'New Block',
+      subtitle: blockData.subtitle || '',
+      config: blockData.config || {},
+      sortOrder: blockData.sortOrder !== undefined ? blockData.sortOrder : currentBlocks.length,
+      isActive: blockData.isActive !== undefined ? blockData.isActive : true,
+      isPinned: blockData.isPinned || false,
+      scheduleStart: blockData.scheduleStart,
+      scheduleEnd: blockData.scheduleEnd,
+      visibilityRule: blockData.visibilityRule || 'all',
+      clickCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updated = [...currentBlocks, newBlock];
+    this.setBlocks(updated, pid);
+    this.addActivityLog(pid, `Added ${newBlock.blockType} block "${newBlock.title}"`, 'link');
+    return newBlock;
+  }
+
+  public static updateBlock(id: string, updates: Partial<PageBlock>, profileId?: string): PageBlock | null {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentBlocks = this.getBlocks(pid);
+    const idx = currentBlocks.findIndex(b => b.id === id);
+    if (idx === -1) return null;
+
+    currentBlocks[idx] = {
+      ...currentBlocks[idx],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.setBlocks(currentBlocks, pid);
+    return currentBlocks[idx];
+  }
+
+  public static deleteBlock(id: string, profileId?: string): void {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentBlocks = this.getBlocks(pid).filter(b => b.id !== id);
+    this.setBlocks(currentBlocks, pid);
+  }
+
+  // --- COMMERCE & STOREFRONT CRUD ---
+  public static getProducts(profileId?: string): Product[] {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const productsMap = this.getStored<Record<string, Product[]>>(KEYS.PRODUCTS, {});
+    return productsMap[pid] || [];
+  }
+
+  public static setProducts(products: Product[], profileId?: string): void {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const productsMap = this.getStored<Record<string, Product[]>>(KEYS.PRODUCTS, {});
+    productsMap[pid] = products;
+    this.setStored(KEYS.PRODUCTS, productsMap);
+  }
+
+  public static addProduct(productData: Partial<Product>, profileId?: string): Product {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentProducts = this.getProducts(pid);
+    const newProduct: Product = {
+      id: productData.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      profileId: pid,
+      title: productData.title || 'New Product',
+      slug: productData.slug || (productData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'new-product'),
+      description: productData.description || '',
+      productType: productData.productType || 'digital_download',
+      priceInr: productData.priceInr ?? 499,
+      priceUsd: productData.priceUsd ?? 7,
+      compareAtPriceInr: productData.compareAtPriceInr,
+      currency: productData.currency || 'INR',
+      coverImageUrl: productData.coverImageUrl || '',
+      galleryUrls: productData.galleryUrls || [],
+      downloadFileUrl: productData.downloadFileUrl || '',
+      redirectUrl: productData.redirectUrl,
+      isActive: productData.isActive !== undefined ? productData.isActive : true,
+      inventoryCount: productData.inventoryCount ?? -1,
+      salesCount: 0,
+      totalRevenueInr: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updated = [newProduct, ...currentProducts];
+    this.setProducts(updated, pid);
+    this.addActivityLog(pid, `Created product "${newProduct.title}"`, 'project');
+    return newProduct;
+  }
+
+  public static updateProduct(id: string, updates: Partial<Product>, profileId?: string): Product | null {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentProducts = this.getProducts(pid);
+    const idx = currentProducts.findIndex(p => p.id === id);
+    if (idx === -1) return null;
+
+    currentProducts[idx] = {
+      ...currentProducts[idx],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.setProducts(currentProducts, pid);
+    return currentProducts[idx];
+  }
+
+  public static deleteProduct(id: string, profileId?: string): void {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentProducts = this.getProducts(pid).filter(p => p.id !== id);
+    this.setProducts(currentProducts, pid);
+  }
+
+  // --- ORDERS & TRANSACTIONS ---
+  public static getOrders(profileId?: string): Order[] {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const ordersMap = this.getStored<Record<string, Order[]>>(KEYS.ORDERS, {});
+    return ordersMap[pid] || [];
+  }
+
+  public static createOrder(orderData: Partial<Order>, profileId?: string): Order {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentOrders = this.getOrders(pid);
+    const newOrder: Order = {
+      id: orderData.id || `ord_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      profileId: pid,
+      orderNumber: orderData.orderNumber || `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      customerEmail: orderData.customerEmail || 'customer@example.com',
+      customerName: orderData.customerName,
+      customerPhone: orderData.customerPhone,
+      subtotalAmount: orderData.subtotalAmount || 0,
+      discountAmount: orderData.discountAmount || 0,
+      totalAmount: orderData.totalAmount || 0,
+      currency: orderData.currency || 'INR',
+      paymentStatus: orderData.paymentStatus || 'paid',
+      fulfillmentStatus: orderData.fulfillmentStatus || 'fulfilled',
+      paymentProvider: orderData.paymentProvider || 'razorpay',
+      externalPaymentId: orderData.externalPaymentId,
+      items: orderData.items || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updated = [newOrder, ...currentOrders];
+    const ordersMap = this.getStored<Record<string, Order[]>>(KEYS.ORDERS, {});
+    ordersMap[pid] = updated;
+    this.setStored(KEYS.ORDERS, ordersMap);
+
+    this.addActivityLog(pid, `New order ${newOrder.orderNumber} received (₹${newOrder.totalAmount})`, 'order');
+    return newOrder;
+  }
+
+  // --- AUDIENCE & SUBSCRIBERS ---
+  public static getSubscribers(profileId?: string): Subscriber[] {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const subscribersMap = this.getStored<Record<string, Subscriber[]>>(KEYS.SUBSCRIBERS, {});
+    return subscribersMap[pid] || [];
+  }
+
+  public static addSubscriber(subData: Partial<Subscriber>, profileId?: string): Subscriber {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentSubscribers = this.getSubscribers(pid);
+    const cleanEmail = (subData.email || '').trim().toLowerCase();
+
+    // Check duplicate
+    const existing = currentSubscribers.find(s => s.email.toLowerCase() === cleanEmail);
+    if (existing) return existing;
+
+    const newSub: Subscriber = {
+      id: subData.id || `sub_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      profileId: pid,
+      email: cleanEmail,
+      name: subData.name,
+      phone: subData.phone,
+      source: subData.source || 'profile',
+      tags: subData.tags || ['lead'],
+      isActive: true,
+      consentGiven: subData.consentGiven !== undefined ? subData.consentGiven : true,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = [newSub, ...currentSubscribers];
+    const subscribersMap = this.getStored<Record<string, Subscriber[]>>(KEYS.SUBSCRIBERS, {});
+    subscribersMap[pid] = updated;
+    this.setStored(KEYS.SUBSCRIBERS, subscribersMap);
+
+    this.addActivityLog(pid, `New subscriber joined: ${newSub.email}`, 'subscriber');
+    return newSub;
+  }
+
+  public static deleteSubscriber(id: string, profileId?: string): void {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const current = this.getSubscribers(pid).filter(s => s.id !== id);
+    const subscribersMap = this.getStored<Record<string, Subscriber[]>>(KEYS.SUBSCRIBERS, {});
+    subscribersMap[pid] = current;
+    this.setStored(KEYS.SUBSCRIBERS, subscribersMap);
+  }
+
+  public static exportSubscribersCsv(profileId?: string): string {
+    const subs = this.getSubscribers(profileId);
+    const headers = ['Email', 'Name', 'Phone', 'Source', 'Tags', 'Joined At'];
+    const rows = subs.map(s => [
+      s.email,
+      s.name || '',
+      s.phone || '',
+      s.source,
+      s.tags.join('; '),
+      s.createdAt,
+    ]);
+    return [headers.join(','), ...rows.map(r => r.map(f => `"${f.replace(/"/g, '""')}"`).join(','))].join('\n');
+  }
+
+  // --- SERVICES & BOOKINGS ---
+  public static getServices(profileId?: string): Service[] {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const servicesMap = this.getStored<Record<string, Service[]>>(KEYS.SERVICES, {});
+    return servicesMap[pid] || [];
+  }
+
+  public static setServices(services: Service[], profileId?: string): void {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const servicesMap = this.getStored<Record<string, Service[]>>(KEYS.SERVICES, {});
+    servicesMap[pid] = services;
+    this.setStored(KEYS.SERVICES, servicesMap);
+  }
+
+  public static addService(serviceData: Partial<Service>, profileId?: string): Service {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentServices = this.getServices(pid);
+    const newService: Service = {
+      id: serviceData.id || `srv_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      profileId: pid,
+      title: serviceData.title || 'New Service',
+      description: serviceData.description,
+      durationMinutes: serviceData.durationMinutes || 30,
+      priceInr: serviceData.priceInr ?? 999,
+      currency: serviceData.currency || 'INR',
+      locationType: serviceData.locationType || 'video',
+      meetingUrl: serviceData.meetingUrl || 'https://meet.google.com/call',
+      isActive: serviceData.isActive !== undefined ? serviceData.isActive : true,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = [...currentServices, newService];
+    this.setServices(updated, pid);
+    return newService;
+  }
+
+  public static getBookings(profileId?: string): Booking[] {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const bookingsMap = this.getStored<Record<string, Booking[]>>(KEYS.BOOKINGS, {});
+    return bookingsMap[pid] || [];
+  }
+
+  public static createBooking(bookingData: Partial<Booking>, profileId?: string): Booking {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentBookings = this.getBookings(pid);
+    const newBooking: Booking = {
+      id: bookingData.id || `bkg_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      serviceId: bookingData.serviceId || '',
+      profileId: pid,
+      clientName: bookingData.clientName || 'Client',
+      clientEmail: bookingData.clientEmail || 'client@example.com',
+      clientPhone: bookingData.clientPhone,
+      scheduledAt: bookingData.scheduledAt || new Date(Date.now() + 86400000 * 2).toISOString(),
+      durationMinutes: bookingData.durationMinutes || 30,
+      status: bookingData.status || 'pending',
+      notes: bookingData.notes,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = [newBooking, ...currentBookings];
+    const bookingsMap = this.getStored<Record<string, Booking[]>>(KEYS.BOOKINGS, {});
+    bookingsMap[pid] = updated;
+    this.setStored(KEYS.BOOKINGS, bookingsMap);
+
+    this.addActivityLog(pid, `New booking scheduled with ${newBooking.clientName}`, 'booking');
+    return newBooking;
+  }
+
+  public static addBooking(bookingData: Partial<Booking>, profileId?: string): Booking {
+    return this.createBooking(bookingData, profileId);
+  }
+
+  public static updateBookingStatus(bookingId: string, status: Booking['status'], profileId?: string): Booking | null {
+    this.ensureInitialized();
+    const pid = profileId || this.getProfile().id;
+    const currentBookings = this.getBookings(pid);
+    const idx = currentBookings.findIndex(b => b.id === bookingId);
+    if (idx === -1) return null;
+
+    currentBookings[idx] = {
+      ...currentBookings[idx],
+      status,
+    };
+
+    const bookingsMap = this.getStored<Record<string, Booking[]>>(KEYS.BOOKINGS, {});
+    bookingsMap[pid] = currentBookings;
+    this.setStored(KEYS.BOOKINGS, bookingsMap);
+    return currentBookings[idx];
   }
 
   // --- ACTIVITY LOGS ---
@@ -577,6 +1002,8 @@ export class LinkedTreeStore {
           return {
             profile: first,
             links: this.getLinks(first.id).filter(l => l.isActive),
+            blocks: this.getBlocks(first.id).filter(b => b.isActive),
+            products: this.getProducts(first.id).filter(p => p.isActive),
             socialLinks: this.getSocialLinks(first.id),
             projects: this.getProjects(first.id),
             appearance: this.getAppearance(first.id),
@@ -589,6 +1016,8 @@ export class LinkedTreeStore {
     return {
       profile: targetProfile,
       links: this.getLinks(targetProfile.id).filter(l => l.isActive),
+      blocks: this.getBlocks(targetProfile.id).filter(b => b.isActive),
+      products: this.getProducts(targetProfile.id).filter(p => p.isActive),
       socialLinks: this.getSocialLinks(targetProfile.id),
       projects: this.getProjects(targetProfile.id),
       appearance: this.getAppearance(targetProfile.id),
@@ -616,9 +1045,33 @@ export class LinkedTreeStore {
       delete projectsMap[profileId];
       delete appearanceMap[profileId];
 
+      const blocksMap = this.getStored<Record<string, PageBlock[]>>(KEYS.BLOCKS, {});
+      delete blocksMap[profileId];
+
+      const productsMap = this.getStored<Record<string, Product[]>>(KEYS.PRODUCTS, {});
+      delete productsMap[profileId];
+
+      const ordersMap = this.getStored<Record<string, Order[]>>(KEYS.ORDERS, {});
+      delete ordersMap[profileId];
+
+      const subscribersMap = this.getStored<Record<string, Subscriber[]>>(KEYS.SUBSCRIBERS, {});
+      delete subscribersMap[profileId];
+
+      const servicesMap = this.getStored<Record<string, Service[]>>(KEYS.SERVICES, {});
+      delete servicesMap[profileId];
+
+      const bookingsMap = this.getStored<Record<string, Booking[]>>(KEYS.BOOKINGS, {});
+      delete bookingsMap[profileId];
+
       this.setStored(KEYS.PROFILES, profiles);
       this.setStored(KEYS.USERS, users);
       this.setStored(KEYS.LINKS, linksMap);
+      this.setStored(KEYS.BLOCKS, blocksMap);
+      this.setStored(KEYS.PRODUCTS, productsMap);
+      this.setStored(KEYS.ORDERS, ordersMap);
+      this.setStored(KEYS.SUBSCRIBERS, subscribersMap);
+      this.setStored(KEYS.SERVICES, servicesMap);
+      this.setStored(KEYS.BOOKINGS, bookingsMap);
       this.setStored(KEYS.SOCIAL_LINKS, socialsMap);
       this.setStored(KEYS.PROJECTS, projectsMap);
       this.setStored(KEYS.APPEARANCE, appearanceMap);

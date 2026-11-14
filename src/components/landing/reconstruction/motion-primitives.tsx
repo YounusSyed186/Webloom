@@ -299,7 +299,6 @@ export function Tilt3DCard({
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      whileHover={prefersReducedMotion ? undefined : { scale: scaleOnHover, y: -4 }}
       transition={{ type: 'spring', stiffness: 220, damping: 20 }}
       style={{
         ...(style as Record<string, MotionValue<number> | string | number>),

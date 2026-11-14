@@ -280,14 +280,18 @@ export function WhatYouCanBuildReconstructed() {
 
         {/* 4 High-Resolution Handmade Cotton-Rag Deckle-Edge Feature Cards */}
         <motion.div
-          initial={isOverlay ? "visible" : "hidden"}
+          initial={isOverlay ? false : "hidden"}
           animate={isOverlay ? "visible" : undefined}
           whileInView={isOverlay ? undefined : "visible"}
           viewport={{ once: true, amount: 0.2 }}
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.08 } },
-          }}
+          variants={
+            isOverlay
+              ? undefined
+              : {
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.08 } },
+                }
+          }
           style={{ transformStyle: 'preserve-3d' }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 max-w-5xl mx-auto relative z-20"
         >
@@ -296,6 +300,8 @@ export function WhatYouCanBuildReconstructed() {
             return (
               <motion.div
                 key={idx}
+                initial={isOverlay ? false : undefined}
+                animate={isOverlay ? { opacity: 1, y: 0, rotateX: 0, rotateY: 0 } : undefined}
                 style={
                   prefersReducedMotion
                     ? undefined
@@ -306,21 +312,25 @@ export function WhatYouCanBuildReconstructed() {
                         transformStyle: 'preserve-3d',
                       }
                 }
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                    y: 26,
-                    rotateX: 14,
-                    rotateY: card.enterRotateY,
-                  },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    rotateX: 0,
-                    rotateY: 0,
-                    transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
-                  },
-                }}
+                variants={
+                  isOverlay
+                    ? undefined
+                    : {
+                        hidden: {
+                          opacity: 0,
+                          y: 26,
+                          rotateX: 14,
+                          rotateY: card.enterRotateY,
+                        },
+                        visible: {
+                          opacity: 1,
+                          y: 0,
+                          rotateX: 0,
+                          rotateY: 0,
+                          transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+                        },
+                      }
+                }
               >
                 <Tilt3DCard
                   maxTilt={9.5}

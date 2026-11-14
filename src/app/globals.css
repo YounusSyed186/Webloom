@@ -229,21 +229,52 @@
    Synchronized Dual-Layer Theme Reveal (Hardware-Accelerated Crisp Circle)
    ============================================================================ */
 .webloom-dark-replica-mask {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
   clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-doc-x, -9999px) var(--cursor-doc-y, -9999px));
   -webkit-clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-doc-x, -9999px) var(--cursor-doc-y, -9999px));
   will-change: clip-path;
   pointer-events: none;
+  z-index: 20;
 }
 
 .webloom-dark-navbar-mask {
+  position: fixed !important;
+  inset: 0 !important;
   clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-win-x, -9999px) var(--cursor-win-y, -9999px));
   -webkit-clip-path: circle(var(--cursor-radius, 0px) at var(--cursor-win-x, -9999px) var(--cursor-win-y, -9999px));
   will-change: clip-path;
   pointer-events: none;
+  z-index: 55;
 }
 
 /* Ensure all content inside the reveal container renders without being stuck at opacity: 0 */
 .webloom-dark-replica-mask [style*="opacity: 0"],
-.webloom-dark-replica-mask [style*="opacity:0"] {
+.webloom-dark-replica-mask [style*="opacity:0"],
+.webloom-dark-replica-mask [style*="opacity: 0."],
+.webloom-dark-replica-mask [style*="opacity:0."],
+.webloom-dark-replica-mask [style*="visibility: hidden"],
+.webloom-dark-replica-mask [style*="visibility:hidden"] {
   opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.webloom-dark-replica-mask div,
+.webloom-dark-replica-mask section,
+.webloom-dark-replica-mask article,
+.webloom-dark-replica-mask main,
+.webloom-dark-replica-mask h1,
+.webloom-dark-replica-mask h2,
+.webloom-dark-replica-mask h3,
+.webloom-dark-replica-mask h4,
+.webloom-dark-replica-mask p,
+.webloom-dark-replica-mask span,
+.webloom-dark-replica-mask img,
+.webloom-dark-replica-mask svg,
+.webloom-dark-replica-mask button,
+.webloom-dark-replica-mask a {
+  visibility: visible !important;
 }

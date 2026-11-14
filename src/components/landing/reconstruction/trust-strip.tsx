@@ -63,24 +63,34 @@ export function TrustStripReconstructed() {
 
         <motion.div
           style={prefersReducedMotion ? undefined : { x: stripX }}
-          initial={isOverlay ? "visible" : "hidden"}
+          initial={isOverlay ? false : "hidden"}
           animate={isOverlay ? "visible" : undefined}
           whileInView={isOverlay ? undefined : "visible"}
           viewport={{ once: true, amount: 0.3 }}
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.06 } },
-          }}
+          variants={
+            isOverlay
+              ? undefined
+              : {
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.06 } },
+                }
+          }
           className={`flex flex-wrap items-center justify-center gap-7 sm:gap-10 md:gap-14 ${
             isDark ? 'text-[#EAE0D2]' : 'text-[#221E1B]'
           }`}
         >
           {/* Notion */}
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 0.85, y: 0 },
-            }}
+            initial={isOverlay ? false : undefined}
+            animate={isOverlay ? { opacity: 0.85, y: 0 } : undefined}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 0.85, y: 0 },
+                  }
+            }
             whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
@@ -92,10 +102,16 @@ export function TrustStripReconstructed() {
 
           {/* Figma */}
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 0.85, y: 0 },
-            }}
+            initial={isOverlay ? false : undefined}
+            animate={isOverlay ? { opacity: 0.85, y: 0 } : undefined}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 0.85, y: 0 },
+                  }
+            }
             whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
@@ -111,10 +127,16 @@ export function TrustStripReconstructed() {
 
           {/* Vercel */}
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 0.85, y: 0 },
-            }}
+            initial={isOverlay ? false : undefined}
+            animate={isOverlay ? { opacity: 0.85, y: 0 } : undefined}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 0.85, y: 0 },
+                  }
+            }
             whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
@@ -126,10 +148,16 @@ export function TrustStripReconstructed() {
 
           {/* GitHub */}
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 0.85, y: 0 },
-            }}
+            initial={isOverlay ? false : undefined}
+            animate={isOverlay ? { opacity: 0.85, y: 0 } : undefined}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 0.85, y: 0 },
+                  }
+            }
             whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
@@ -141,10 +169,16 @@ export function TrustStripReconstructed() {
 
           {/* Spotify */}
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 0.85, y: 0 },
-            }}
+            initial={isOverlay ? false : undefined}
+            animate={isOverlay ? { opacity: 0.85, y: 0 } : undefined}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 0.85, y: 0 },
+                  }
+            }
             whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >
@@ -156,10 +190,16 @@ export function TrustStripReconstructed() {
 
           {/* Adobe */}
           <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 0.85, y: 0 },
-            }}
+            initial={isOverlay ? false : undefined}
+            animate={isOverlay ? { opacity: 0.85, y: 0 } : undefined}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 0.85, y: 0 },
+                  }
+            }
             whileHover={{ opacity: 1, y: -3, scale: 1.06 }}
             className="flex items-center gap-2 cursor-pointer transition-colors"
           >

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   motion,
   AnimatePresence,
@@ -21,87 +22,47 @@ import {
   useWebloomSyncState,
   useIsWebloomOverlay,
 } from './webloom-dual-theme-context';
-
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Seed · Free',
-    tagline: 'Everything you need to carve out your corner of the internet.',
-    monthlyPrice: '$0',
-    annualPrice: '$0',
-    periodLabel: 'forever free',
-    ctaLabel: 'Start for free',
-    featured: false,
-    bgStyle: 'linear-gradient(155deg, #F6EFE2 0%, #EDE2CE 100%)',
-    borderColor: '#DCD0BC',
-    darkBgStyle: 'linear-gradient(155deg, #212620 0%, #191D18 100%)',
-    darkBorderColor: '#363F34',
-    tapeRotate: '-rotate-2',
-    features: [
-      'Personal Webloom page & custom handle',
-      'Unlimited links, notes & social profiles',
-      'Portfolio & featured projects showcase',
-      'Curated editorial & botanical templates',
-      'Core visitor & click analytics',
-      'Custom vector QR code card',
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'Creator Pro',
-    tagline: 'For builders, writers, and designers who want their own domain and full creative control.',
-    monthlyPrice: '$8',
-    annualPrice: '$5',
-    periodLabel: 'per month',
-    ctaLabel: 'Create your Pro space',
-    featured: true,
-    bgStyle: 'linear-gradient(155deg, #F5E8D3 0%, #EBD7BA 100%)',
-    borderColor: '#D6BE9C',
-    darkBgStyle: 'linear-gradient(155deg, #2C221A 0%, #211913 100%)',
-    darkBorderColor: '#544130',
-    tapeRotate: 'rotate-2',
-    features: [
-      'Everything in Seed Free, plus:',
-      'Custom domain support (yourname.com)',
-      'Full typography, layout & palette studio',
-      'Blog, journal & long-form publishing',
-      'Deep referral & conversion analytics',
-      'Remove all Webloom branding & badges',
-    ],
-  },
-  {
-    id: 'studio',
-    name: 'Studio',
-    tagline: 'For small studios, collectives, and freelancers managing multiple digital spaces.',
-    monthlyPrice: '$19',
-    annualPrice: '$14',
-    periodLabel: 'per month',
-    ctaLabel: 'Start Studio trial',
-    featured: false,
-    bgStyle: 'linear-gradient(155deg, #EFE7F2 0%, #E4D8E9 100%)',
-    borderColor: '#D2C3D8',
-    darkBgStyle: 'linear-gradient(155deg, #261F2B 0%, #1C1720 100%)',
-    darkBorderColor: '#3F3447',
-    tapeRotate: '-rotate-1',
-    features: [
-      'Everything in Creator Pro, plus:',
-      'Up to 5 custom-domain Webloom spaces',
-      'Collaborative team editing & roles',
-      'Custom CSS & head script injection',
-      'Exportable client & traffic reports',
-      'Priority human support',
-    ],
-  },
-];
+import { getPublicPricingPlans, FormattedPricingTier } from '@/lib/billing/plans';
+import { loadRazorpayScript } from '@/lib/billing/razorpay';
+import { LinkedTreeStore } from '@/lib/data-store';
 
 export function PricingReconstructed() {
   const theme = useWebloomTheme();
   const isOverlay = useIsWebloomOverlay();
   const isDark = theme === 'dark';
-  const { billingCycle: billing, setBillingCycle: setBilling } = useWebloomSyncState();
+  const router = useRouter();
+
+  const {
+    billingCycle: billing,
+    setBillingCycle: setBilling,
+    currency,
+    setCurrency,
+  } = useWebloomSyncState();
+
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const { setAuthModalMode, setIsAuthModalOpen } = useApp();
+  const { user, profile, updateProfile, setAuthModalMode, setIsAuthModalOpen } = useApp();
+
+  // Dynamic public plans from authoritative catalog
+  const plans = useMemo(() => {
+    return getPublicPricingPlans(currency, billing);
+  }, [currency, billing]);
+
+  // Checkout modal & payment states (only relevant on base interactive layer)
+  const [selectedPlan, setSelectedPlan] = useState<FormattedPricingTier | null>(null);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [checkoutEmail, setCheckoutEmail] = useState(profile?.email || user?.email || '');
+  const [checkoutName, setCheckoutName] = useState(profile?.displayName || user?.name || '');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  // Success celebration modal state
+  const [successData, setSuccessData] = useState<{
+    planName: string;
+    paymentId: string;
+    amount: string;
+    billingCycle: string;
+  } | null>(null);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -116,9 +77,145 @@ export function PricingReconstructed() {
   const rightTierRotateY = useTransform(smoothScroll, [0.08, 0.45], [-10, 0]);
   const centerTierZ = useTransform(smoothScroll, [0.08, 0.48, 0.9], [0, 26, 18]);
 
-  const handleSelectPlan = () => {
-    setAuthModalMode('signup');
-    setIsAuthModalOpen(true);
+  const handlePlanAction = useCallback((plan: FormattedPricingTier) => {
+    if (plan.id === 'free') {
+      if (user || profile?.id) {
+        router.push('/dashboard');
+      } else {
+        setAuthModalMode('signup');
+        setIsAuthModalOpen(true);
+      }
+      return;
+    }
+
+    // Set defaults for checkout modal
+    setSelectedPlan(plan);
+    setCheckoutEmail(profile?.email || user?.email || '');
+    setCheckoutName(profile?.displayName || user?.name || '');
+    setPaymentError(null);
+    setCheckoutModalOpen(true);
+  }, [user, profile, router, setAuthModalMode, setIsAuthModalOpen]);
+
+  // Trigger Razorpay payment gateway
+  const handleInitiateRazorpay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPlan) return;
+
+    const emailToUse = checkoutEmail.trim();
+    if (!emailToUse || !emailToUse.includes('@')) {
+      setPaymentError('Please enter a valid email address to link your subscription.');
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    setPaymentError(null);
+
+    try {
+      // 1. Create order on authoritative server endpoint
+      const orderRes = await fetch('/api/billing/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: selectedPlan.id,
+          billingCycle: billing,
+          currency,
+          customerEmail: emailToUse,
+          customerName: checkoutName.trim() || 'Webloom Creator',
+          profileId: profile?.id,
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to initialize payment gateway order');
+      }
+
+      // 2. Load official Razorpay checkout script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Unable to reach Razorpay secure payment script. Please check your connection.');
+      }
+
+      // 3. Launch Razorpay Checkout Modal
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Webloom Creator Platform',
+        description: `${selectedPlan.name} (${billing === 'annual' ? 'Billed Yearly · Save 35%' : 'Monthly'})`,
+        image: 'https://webloom.site/favicon.ico',
+        order_id: orderData.orderId,
+        prefill: {
+          name: checkoutName.trim() || profile?.displayName || 'Webloom Creator',
+          email: emailToUse,
+        },
+        theme: {
+          color: isDark ? '#E6B86A' : '#181614',
+          backdrop_color: 'rgba(0, 0, 0, 0.75)',
+        },
+        modal: {
+          backdropclose: true,
+          ondismiss: () => {
+            setIsProcessingPayment(false);
+          },
+        },
+        handler: async function (response: any) {
+          try {
+            // 4. Verify payment signature on backend
+            const verifyRes = await fetch('/api/billing/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                planId: selectedPlan.id,
+                billingCycle: billing,
+                profileId: profile?.id,
+                customerEmail: emailToUse,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              // 5. Update local state & persistent profile
+              const activePlanId = selectedPlan.id as any;
+              updateProfile({ plan: activePlanId });
+              if (profile?.id) {
+                LinkedTreeStore.updateProfile(profile.id, { plan: activePlanId });
+              }
+
+              setCheckoutModalOpen(false);
+              setSuccessData({
+                planName: selectedPlan.name,
+                paymentId: response.razorpay_payment_id,
+                amount: selectedPlan.displayPrice,
+                billingCycle: billing,
+              });
+            } else {
+              setPaymentError(verifyData.error || 'Payment signature could not be verified.');
+            }
+          } catch (verErr: any) {
+            console.error('Signature verification error:', verErr);
+            setPaymentError(verErr.message || 'Error communicating with verification server.');
+          } finally {
+            setIsProcessingPayment(false);
+          }
+        },
+      };
+
+      const razorpayInstance = new (window as any).Razorpay(options);
+      razorpayInstance.on('payment.failed', function (failure: any) {
+        setIsProcessingPayment(false);
+        setPaymentError(failure.error?.description || 'Payment was declined or cancelled.');
+      });
+
+      razorpayInstance.open();
+    } catch (err: any) {
+      console.error('Payment initialization error:', err);
+      setIsProcessingPayment(false);
+      setPaymentError(err.message || 'Unable to open payment modal. Please try again.');
+    }
   };
 
   return (
@@ -187,72 +284,118 @@ export function PricingReconstructed() {
               Build and publish your personal corner for free forever. Upgrade anytime for custom domains and deeper tools.
             </p>
 
-            {/* Tactile Stationery Billing Toggle */}
-            <div
-              className={`mt-6 inline-flex items-center p-1 rounded-full border shadow-2xs ${
-                isDark
-                  ? 'bg-[#231D18] border-[#3C3128]'
-                  : 'bg-[#EFE6D6] border-[#DCD0BC]'
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => setBilling('monthly')}
-                className={`px-4 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-medium transition-all ${
-                  billing === 'monthly'
-                    ? isDark
-                      ? 'bg-[#332A22] text-[#F4EFE6] shadow-xs border border-[#4C3F33]'
-                      : 'bg-[#FAF6EE] text-[#1F1A16] shadow-xs border border-[#DFD2BD]'
-                    : isDark
-                      ? 'text-[#A89B8C] hover:text-[#F4EFE6]'
-                      : 'text-[#65594D] hover:text-[#1F1A16]'
+            {/* Tactile Stationery Dual Toggles (Billing Cycle + Currency Switcher) */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              {/* Monthly / Yearly Billing Toggle */}
+              <div
+                className={`inline-flex items-center p-1 rounded-full border shadow-2xs ${
+                  isDark
+                    ? 'bg-[#231D18] border-[#3C3128]'
+                    : 'bg-[#EFE6D6] border-[#DCD0BC]'
                 }`}
               >
-                Monthly
-              </button>
-              <button
-                type="button"
-                onClick={() => setBilling('annual')}
-                className={`px-4 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-medium transition-all flex items-center gap-1.5 ${
-                  billing === 'annual'
-                    ? isDark
-                      ? 'bg-[#332A22] text-[#F4EFE6] shadow-xs border border-[#4C3F33]'
-                      : 'bg-[#FAF6EE] text-[#1F1A16] shadow-xs border border-[#DFD2BD]'
-                    : isDark
-                      ? 'text-[#A89B8C] hover:text-[#F4EFE6]'
-                      : 'text-[#65594D] hover:text-[#1F1A16]'
-                }`}
-              >
-                <span>Yearly</span>
-                <span
-                  className={`text-[10.5px] border px-2 py-0.2 rounded-full font-semibold ${
-                    isDark
-                      ? 'bg-[#22301F] text-[#B8D8A8] border-[#364D31]'
-                      : 'bg-[#DCE5CE] text-[#2D3B22] border-[#C2CFAF]'
+                <button
+                  type="button"
+                  onClick={() => setBilling('monthly')}
+                  className={`px-4 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-medium transition-all ${
+                    billing === 'monthly'
+                      ? isDark
+                        ? 'bg-[#332A22] text-[#F4EFE6] shadow-xs border border-[#4C3F33]'
+                        : 'bg-[#FAF6EE] text-[#1F1A16] shadow-xs border border-[#DFD2BD]'
+                      : isDark
+                        ? 'text-[#A89B8C] hover:text-[#F4EFE6]'
+                        : 'text-[#65594D] hover:text-[#1F1A16]'
                   }`}
                 >
-                  Save 35%
-                </span>
-              </button>
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBilling('annual')}
+                  className={`px-4 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-medium transition-all flex items-center gap-1.5 ${
+                    billing === 'annual'
+                      ? isDark
+                        ? 'bg-[#332A22] text-[#F4EFE6] shadow-xs border border-[#4C3F33]'
+                        : 'bg-[#FAF6EE] text-[#1F1A16] shadow-xs border border-[#DFD2BD]'
+                      : isDark
+                        ? 'text-[#A89B8C] hover:text-[#F4EFE6]'
+                        : 'text-[#65594D] hover:text-[#1F1A16]'
+                  }`}
+                >
+                  <span>Yearly</span>
+                  <span
+                    className={`text-[10.5px] border px-2 py-0.2 rounded-full font-semibold ${
+                      isDark
+                        ? 'bg-[#22301F] text-[#B8D8A8] border-[#364D31]'
+                        : 'bg-[#DCE5CE] text-[#2D3B22] border-[#C2CFAF]'
+                    }`}
+                  >
+                    Save 35%
+                  </span>
+                </button>
+              </div>
+
+              {/* Seamless Currency Switcher ($ USD / ₹ INR) */}
+              <div
+                className={`inline-flex items-center p-1 rounded-full border shadow-2xs ${
+                  isDark
+                    ? 'bg-[#231D18] border-[#3C3128]'
+                    : 'bg-[#EFE6D6] border-[#DCD0BC]'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setCurrency('USD')}
+                  className={`px-3.5 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-medium transition-all ${
+                    currency === 'USD'
+                      ? isDark
+                        ? 'bg-[#332A22] text-[#F4EFE6] shadow-xs border border-[#4C3F33]'
+                        : 'bg-[#FAF6EE] text-[#1F1A16] shadow-xs border border-[#DFD2BD]'
+                      : isDark
+                        ? 'text-[#A89B8C] hover:text-[#F4EFE6]'
+                        : 'text-[#65594D] hover:text-[#1F1A16]'
+                  }`}
+                >
+                  $ USD
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrency('INR')}
+                  className={`px-3.5 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-medium transition-all ${
+                    currency === 'INR'
+                      ? isDark
+                        ? 'bg-[#332A22] text-[#F4EFE6] shadow-xs border border-[#4C3F33]'
+                        : 'bg-[#FAF6EE] text-[#1F1A16] shadow-xs border border-[#DFD2BD]'
+                      : isDark
+                        ? 'text-[#A89B8C] hover:text-[#F4EFE6]'
+                        : 'text-[#65594D] hover:text-[#1F1A16]'
+                  }`}
+                >
+                  ₹ INR
+                </button>
+              </div>
             </div>
           </motion.div>
 
-          {/* 3 Handmade Paper Pricing Cards */}
+          {/* 3 Handmade Paper Dynamic Pricing Cards */}
           <motion.div
-            initial={isOverlay ? "visible" : "hidden"}
+            initial={isOverlay ? false : "hidden"}
             animate={isOverlay ? "visible" : undefined}
             whileInView={isOverlay ? undefined : "visible"}
             viewport={{ once: true, amount: 0.2 }}
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.1 } },
-            }}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: {},
+                    visible: { transition: { staggerChildren: 0.1 } },
+                  }
+            }
             style={{ transformStyle: 'preserve-3d' }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-7 max-w-5xl mx-auto items-stretch"
           >
-            {PLANS.map((plan, idx) => {
-              const price =
-                billing === 'annual' ? plan.annualPrice : plan.monthlyPrice;
+            {plans.map((plan, idx) => {
+              const price = plan.displayPrice;
 
               const dynamic3DStyle = prefersReducedMotion
                 ? undefined
@@ -265,15 +408,21 @@ export function PricingReconstructed() {
               return (
                 <motion.div
                   key={plan.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 24, rotateX: 8 },
-                    visible: {
-                      opacity: 1,
-                      y: 0,
-                      rotateX: 0,
-                      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
-                    },
-                  }}
+                  initial={isOverlay ? false : undefined}
+                  animate={isOverlay ? { opacity: 1, y: 0, rotateX: 0 } : undefined}
+                  variants={
+                    isOverlay
+                      ? undefined
+                      : {
+                          hidden: { opacity: 0, y: 24, rotateX: 8 },
+                          visible: {
+                            opacity: 1,
+                            y: 0,
+                            rotateX: 0,
+                            transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+                          },
+                        }
+                  }
                   style={dynamic3DStyle}
                   className="flex"
                 >
@@ -400,7 +549,7 @@ export function PricingReconstructed() {
                               <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12" />
                             </svg>
                           )}
-                          {plan.id === 'studio' && (
+                          {(plan.id === 'business' || (plan.id as any) === 'studio') && (
                             <svg
                               className={`w-6 h-6 fill-none ${
                                 isDark ? 'stroke-[#EAE0D2]' : 'stroke-[#2B231D]'
@@ -456,7 +605,7 @@ export function PricingReconstructed() {
                       >
                         <AnimatePresence mode="wait">
                           <motion.span
-                            key={price}
+                            key={`${price}-${currency}`}
                             initial={{ opacity: 0, y: 6 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
@@ -512,11 +661,11 @@ export function PricingReconstructed() {
                       </ul>
                     </div>
 
-                    {/* Magnetic Action Button */}
+                    {/* Magnetic Action Button connected to Razorpay checkout */}
                     <MagneticWrapper strength={0.18} className="w-full">
                       <button
                         type="button"
-                        onClick={handleSelectPlan}
+                        onClick={() => handlePlanAction(plan)}
                         className={`w-full h-[40px] sm:h-[42px] rounded-full text-[13px] sm:text-[13.5px] font-medium inline-flex items-center justify-center gap-1.5 transition-all hover:scale-[1.01] active:scale-[0.99] ${
                           plan.featured
                             ? isDark
@@ -538,6 +687,241 @@ export function PricingReconstructed() {
           </motion.div>
         </CinematicCameraScene>
       </div>
+
+      {/* Razorpay Subscription Checkout Dialog (Interactive Base Only) */}
+      {!isOverlay && checkoutModalOpen && selectedPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className={`w-full max-w-md rounded-2xl border p-6 sm:p-7 shadow-2xl relative ${
+              isDark
+                ? 'bg-[#221B16] border-[#3E3228] text-[#F4EFE6]'
+                : 'bg-[#FAF6EE] border-[#D8CCBA] text-[#1F1A16]'
+            }`}
+          >
+            {/* Top Tape Strip */}
+            <div
+              className={`absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4.5 border shadow-2xs rotate-1 ${
+                isDark
+                  ? 'bg-[#9A7E52]/80 border-[#846B43]/50'
+                  : 'bg-[#E2C88A]/85 border-[#D4B878]/50'
+              }`}
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!isProcessingPayment) setCheckoutModalOpen(false);
+              }}
+              className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-xs opacity-70 hover:opacity-100 ${
+                isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'
+              }`}
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`text-sm ${isDark ? 'text-[#E6B86A]' : 'text-[#967137]'}`}>✦</span>
+              <h3 className="font-serif font-bold text-xl">
+                Activate {selectedPlan.name}
+              </h3>
+            </div>
+
+            <p className={`text-xs leading-relaxed mb-5 ${isDark ? 'text-[#C4B7A5]' : 'text-[#5C5042]'}`}>
+              Securely upgrade your creator workspace with Razorpay. Includes instant custom domain activation and creator toolkit.
+            </p>
+
+            {/* Plan Summary Card */}
+            <div
+              className={`p-4 rounded-xl border mb-5 flex items-center justify-between ${
+                isDark
+                  ? 'bg-[#18130F] border-[#362C23]'
+                  : 'bg-[#EFE7D8] border-[#D4C6B1]'
+              }`}
+            >
+              <div>
+                <span className="font-serif font-semibold text-sm block">
+                  {selectedPlan.name}
+                </span>
+                <span className={`text-[11.5px] ${isDark ? 'text-[#9C8F7E]' : 'text-[#7A6D5E]'}`}>
+                  {billing === 'annual' ? 'Billed annually (35% saved)' : 'Billed monthly'}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="font-serif font-bold text-lg block">
+                  {selectedPlan.displayPrice}
+                </span>
+                <span className={`text-[10px] ${isDark ? 'text-[#8C7F6E]' : 'text-[#827566]'}`}>
+                  {billing === 'annual' ? '/mo billed yearly' : '/mo'}
+                </span>
+              </div>
+            </div>
+
+            {/* Checkout Form */}
+            <form onSubmit={handleInitiateRazorpay} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium mb-1 opacity-90">
+                  Account Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={checkoutEmail}
+                  onChange={(e) => setCheckoutEmail(e.target.value)}
+                  placeholder="creator@yourname.com"
+                  className={`w-full px-3 py-2 rounded-lg text-sm border focus:outline-hidden transition-colors ${
+                    isDark
+                      ? 'bg-[#18130F] border-[#3E3228] text-white focus:border-[#E6B86A]'
+                      : 'bg-white border-[#D0C2AE] text-[#1F1A16] focus:border-[#3D3123]'
+                  }`}
+                />
+                <span className={`text-[10.5px] block mt-1 ${isDark ? 'text-[#8C7F6E]' : 'text-[#7A6D5E]'}`}>
+                  Subscription will be linked to this account email
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1 opacity-90">
+                  Creator Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={checkoutName}
+                  onChange={(e) => setCheckoutName(e.target.value)}
+                  placeholder="Your Name / Studio"
+                  className={`w-full px-3 py-2 rounded-lg text-sm border focus:outline-hidden transition-colors ${
+                    isDark
+                      ? 'bg-[#18130F] border-[#3E3228] text-white focus:border-[#E6B86A]'
+                      : 'bg-white border-[#D0C2AE] text-[#1F1A16] focus:border-[#3D3123]'
+                  }`}
+                />
+              </div>
+
+              {paymentError && (
+                <div className="p-3 rounded-lg text-xs bg-red-500/10 border border-red-500/30 text-red-500 font-medium">
+                  {paymentError}
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isProcessingPayment}
+                  className={`w-full h-11 rounded-full font-medium text-sm flex items-center justify-center gap-2 shadow-md transition-all ${
+                    isDark
+                      ? 'bg-[#E6B86A] hover:bg-[#F2C57B] text-[#181410]'
+                      : 'bg-[#1F1A16] hover:bg-black text-[#FAF6EE]'
+                  } disabled:opacity-60 cursor-pointer`}
+                >
+                  {isProcessingPayment ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Connecting to Razorpay...
+                    </span>
+                  ) : (
+                    <>
+                      <span>Proceed to Razorpay Checkout</span>
+                      <span>↗</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="flex items-center justify-center gap-2 mt-3 text-[10.5px] opacity-70">
+                  <span>🔒 256-Bit SSL Encrypted</span>
+                  <span>•</span>
+                  <span>Powered by Razorpay</span>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Success Celebration Modal */}
+      {!isOverlay && successData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-300">
+          <div
+            className={`w-full max-w-md rounded-2xl border p-7 sm:p-8 text-center shadow-2xl relative ${
+              isDark
+                ? 'bg-[#221B16] border-[#3E3228] text-[#F4EFE6]'
+                : 'bg-[#FAF6EE] border-[#D8CCBA] text-[#1F1A16]'
+            }`}
+          >
+            {/* Top Tape Strip */}
+            <div
+              className={`absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4.5 border shadow-2xs rotate-1 ${
+                isDark
+                  ? 'bg-[#9A7E52]/80 border-[#846B43]/50'
+                  : 'bg-[#E2C88A]/85 border-[#D4B878]/50'
+              }`}
+            />
+
+            <div className="w-14 h-14 rounded-full mx-auto mb-4 border flex items-center justify-center text-2xl shadow-sm bg-[#E6B86A]/20 border-[#E6B86A]/40 text-[#E6B86A]">
+              ✦
+            </div>
+
+            <h3 className="font-serif font-bold text-2xl tracking-tight mb-2">
+              Welcome to {successData.planName}!
+            </h3>
+
+            <p className={`text-xs sm:text-sm leading-relaxed mb-6 max-w-xs mx-auto ${
+              isDark ? 'text-[#C4B7A5]' : 'text-[#5C5042]'
+            }`}>
+              Your subscription is active and verified. Custom domains, branding removal, and pro creator studio tools are unlocked.
+            </p>
+
+            <div
+              className={`p-3.5 rounded-xl border mb-6 text-left text-xs space-y-1 ${
+                isDark
+                  ? 'bg-[#18130F] border-[#362C23]'
+                  : 'bg-[#EFE7D8] border-[#D4C6B1]'
+              }`}
+            >
+              <div className="flex justify-between">
+                <span className="opacity-70">Payment ID:</span>
+                <span className="font-mono">{successData.paymentId.slice(0, 16)}...</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="opacity-70">Billing Cadence:</span>
+                <span className="capitalize">{successData.billingCycle}</span>
+              </div>
+              <div className="flex justify-between font-semibold pt-1 border-t border-black/5 dark:border-white/5">
+                <span>Status:</span>
+                <span className="text-emerald-500">Active · Paid</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSuccessData(null);
+                  router.push('/dashboard');
+                }}
+                className={`w-full h-11 rounded-full font-medium text-sm flex items-center justify-center gap-2 shadow-md transition-all ${
+                  isDark
+                    ? 'bg-[#E6B86A] hover:bg-[#F2C57B] text-[#181410]'
+                    : 'bg-[#1F1A16] hover:bg-black text-[#FAF6EE]'
+                }`}
+              >
+                <span>Open Creator Dashboard</span>
+                <span>↗</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSuccessData(null)}
+                className={`w-full py-2 text-xs font-medium opacity-70 hover:opacity-100 transition-opacity`}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

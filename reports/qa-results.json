@@ -1,0 +1,200 @@
+[
+  {
+    "feature": "Registration",
+    "scenario": "Register Account \"Alex Morgan\"",
+    "status": "FAIL",
+    "evidence": "journey-b-dashboard-landed.png",
+    "severity": "Critical",
+    "notes": "URL: http://localhost:3030/",
+    "time": "2026-11-09T08:59:12.558Z"
+  },
+  {
+    "feature": "Session Persistence",
+    "scenario": "F5 Reload Dashboard Session Check",
+    "status": "FAIL",
+    "evidence": "journey-b-dashboard-landed.png",
+    "severity": "Critical",
+    "notes": "URL: http://localhost:3030/",
+    "time": "2026-11-09T08:59:16.331Z"
+  },
+  {
+    "feature": "Creator Profile",
+    "scenario": "Update Name and Bio in Profile Studio",
+    "status": "PASS",
+    "evidence": "journey-c-02-profile-saved.png",
+    "severity": "High",
+    "notes": "Profile details updated and saved",
+    "time": "2026-11-09T08:59:20.767Z"
+  },
+  {
+    "feature": "Public Profile",
+    "scenario": "Public Profile Rendering (/[username])",
+    "status": "PASS",
+    "evidence": "journey-c-03-public-profile.png",
+    "severity": "Critical",
+    "notes": "Public page rendered for @alexmorgan_test",
+    "time": "2026-11-09T08:59:25.385Z"
+  },
+  {
+    "feature": "Link Management",
+    "scenario": "Add Standard Link to Profile",
+    "status": "PASS",
+    "evidence": "journey-d-02-link-added.png",
+    "severity": "High",
+    "notes": "Link added to dashboard",
+    "time": "2026-11-09T08:59:30.132Z"
+  },
+  {
+    "feature": "Block Builder",
+    "scenario": "Blocks Studio Visual Canvas",
+    "status": "PASS",
+    "evidence": "journey-d-03-blocks-studio.png",
+    "severity": "High",
+    "notes": "Tactile blocks interface loaded",
+    "time": "2026-11-09T08:59:32.943Z"
+  },
+  {
+    "feature": "Digital Commerce",
+    "scenario": "Create Digital Product in Store Dashboard",
+    "status": "PASS",
+    "evidence": "journey-e-02-product-created.png",
+    "severity": "High",
+    "notes": "Product created with price and details",
+    "time": "2026-11-09T08:59:37.918Z"
+  },
+  {
+    "feature": "Digital Commerce",
+    "scenario": "Checkout Order Submission (/api/store/checkout)",
+    "status": "PARTIAL",
+    "evidence": "journey-e-02-product-created.png",
+    "severity": "Critical",
+    "notes": "Status 400: Handled",
+    "time": "2026-11-09T08:59:39.754Z"
+  },
+  {
+    "feature": "Bookings Engine",
+    "scenario": "Create Appointment Booking",
+    "status": "FAIL",
+    "evidence": "journey-f-01-bookings-dashboard.png",
+    "severity": "High",
+    "notes": "Appointment created (Status: 400)",
+    "time": "2026-11-09T08:59:44.352Z"
+  },
+  {
+    "feature": "Bookings Engine",
+    "scenario": "Double Booking Prevention",
+    "status": "PASS",
+    "evidence": "journey-f-01-bookings-dashboard.png",
+    "severity": "High",
+    "notes": "Duplicate slot conflict handling: 400",
+    "time": "2026-11-09T08:59:44.352Z"
+  },
+  {
+    "feature": "Audience CRM",
+    "scenario": "Newsletter Lead Capture (/api/subscribers)",
+    "status": "FAIL",
+    "evidence": "journey-g-01-audience-dashboard.png",
+    "severity": "High",
+    "notes": "Subscriber created (Status 400)",
+    "time": "2026-11-09T08:59:50.986Z"
+  },
+  {
+    "feature": "AI Studio",
+    "scenario": "AI Bio Assistant Generation (/api/ai/generate)",
+    "status": "FAIL",
+    "evidence": "journey-h-01-ai-studio.png",
+    "severity": "High",
+    "notes": "Status: 400, Latency: 1433ms",
+    "time": "2026-11-09T08:59:56.118Z"
+  },
+  {
+    "feature": "Semantic Discovery",
+    "scenario": "Vector / Text Search Query (/api/discovery/search)",
+    "status": "PARTIAL",
+    "evidence": "api-discovery-search",
+    "severity": "Medium",
+    "notes": "Status: 405",
+    "time": "2026-11-09T08:59:59.265Z"
+  },
+  {
+    "feature": "Analytics",
+    "scenario": "Event Ingestion (/api/analytics/track)",
+    "status": "FAIL",
+    "evidence": "journey-j-01-analytics.png",
+    "severity": "High",
+    "notes": "Event tracked (Status 400)",
+    "time": "2026-11-09T09:00:09.514Z"
+  },
+  {
+    "feature": "Appearance Studio",
+    "scenario": "Theme Presets and Customization Controls",
+    "status": "PASS",
+    "evidence": "journey-k-01-appearance.png",
+    "severity": "High",
+    "notes": "Themes selectable and rendered",
+    "time": "2026-11-09T09:00:14.073Z"
+  },
+  {
+    "feature": "Multi-Tenant Workspaces",
+    "scenario": "Settings & Workspace Management",
+    "status": "PASS",
+    "evidence": "journey-l-01-settings.png",
+    "severity": "High",
+    "notes": "Settings and workspace management loaded",
+    "time": "2026-11-09T09:00:18.714Z"
+  },
+  {
+    "feature": "Admin Portal",
+    "scenario": "Platform Administration and Overview (/admin)",
+    "status": "PASS",
+    "evidence": "journey-m-01-admin-portal.png",
+    "severity": "Critical",
+    "notes": "Admin console accessible",
+    "time": "2026-11-09T09:00:22.160Z"
+  },
+  {
+    "feature": "Responsive Design",
+    "scenario": "Viewport mobile-iphone-x (375x812)",
+    "status": "PASS",
+    "evidence": "responsive-mobile-iphone-x.png",
+    "severity": "Medium",
+    "notes": "Clean layout without overflow",
+    "time": "2026-11-09T09:00:23.097Z"
+  },
+  {
+    "feature": "Responsive Design",
+    "scenario": "Viewport mobile-iphone-14 (390x844)",
+    "status": "PASS",
+    "evidence": "responsive-mobile-iphone-14.png",
+    "severity": "Medium",
+    "notes": "Clean layout without overflow",
+    "time": "2026-11-09T09:00:23.958Z"
+  },
+  {
+    "feature": "Responsive Design",
+    "scenario": "Viewport tablet-ipad (768x1024)",
+    "status": "PASS",
+    "evidence": "responsive-tablet-ipad.png",
+    "severity": "Medium",
+    "notes": "Clean layout without overflow",
+    "time": "2026-11-09T09:00:24.711Z"
+  },
+  {
+    "feature": "Responsive Design",
+    "scenario": "Viewport desktop-hd (1440x900)",
+    "status": "PASS",
+    "evidence": "responsive-desktop-hd.png",
+    "severity": "Medium",
+    "notes": "Clean layout without overflow",
+    "time": "2026-11-09T09:00:25.476Z"
+  },
+  {
+    "feature": "Responsive Design",
+    "scenario": "Viewport desktop-fullhd (1920x1080)",
+    "status": "PASS",
+    "evidence": "responsive-desktop-fullhd.png",
+    "severity": "Medium",
+    "notes": "Clean layout without overflow",
+    "time": "2026-11-09T09:00:26.270Z"
+  }
+]

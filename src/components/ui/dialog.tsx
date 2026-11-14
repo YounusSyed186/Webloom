@@ -59,7 +59,7 @@ export function Dialog({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             onClick={onClose}
           />
 
@@ -71,7 +71,7 @@ export function Dialog({
             transition={{ type: 'spring', damping: 25, stiffness: 320 }}
             className={twMerge(
               clsx(
-                "relative w-full bg-zinc-900 border border-zinc-800/90 rounded-2xl shadow-2xl p-6 overflow-hidden z-10 my-8 text-zinc-100",
+                "relative w-full bg-[#FAF6EE] dark:bg-[#1E1915] border border-[#DACBB4] dark:border-[#3E342A] rounded-2xl shadow-2xl p-6 overflow-hidden z-10 my-8 text-[#1F1A16] dark:text-[#F4EFE6] transition-colors duration-200",
                 maxWidthClasses[maxWidth],
                 className
               )
@@ -80,12 +80,12 @@ export function Dialog({
             {/* Header */}
             <div className="flex items-start justify-between gap-4 mb-5">
               <div>
-                {title && <h3 className="text-lg font-semibold tracking-tight text-white">{title}</h3>}
-                {description && <p className="text-xs text-zinc-400 mt-1">{description}</p>}
+                {title && <h3 className="text-lg font-serif font-semibold tracking-tight text-[#1F1A16] dark:text-[#F4EFE6]">{title}</h3>}
+                {description && <p className="text-xs text-[#6E6254] dark:text-[#A89F91] mt-1">{description}</p>}
               </div>
               <button
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                className="rounded-lg p-1.5 text-[#6E6254] hover:text-[#1F1A16] hover:bg-[#EAE2D3] dark:text-[#A89F91] dark:hover:text-[#F4EFE6] dark:hover:bg-[#2C241E] transition-colors cursor-pointer"
                 aria-label="Close dialog"
               >
                 <X className="w-4 h-4" />
@@ -125,12 +125,12 @@ export function ConfirmDialog({
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title={title} maxWidth="sm">
       <div className="space-y-4">
-        <p className="text-sm text-zinc-300">{message}</p>
+        <p className="text-sm text-[#544B41] dark:text-[#C8BDB0]">{message}</p>
         <div className="flex justify-end gap-2.5 pt-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium rounded-xl text-zinc-300 hover:bg-zinc-800 transition-colors"
+            className="px-4 py-2 text-xs font-medium rounded-xl text-[#6E6254] hover:bg-[#EAE2D3] dark:text-[#A89F91] dark:hover:bg-[#2C241E] transition-colors cursor-pointer"
           >
             {cancelText}
           </button>
@@ -141,10 +141,10 @@ export function ConfirmDialog({
               onClose();
             }}
             className={clsx(
-              "px-4 py-2 text-xs font-medium rounded-xl text-white transition-all shadow-md active:scale-95",
+              "px-4 py-2 text-xs font-medium rounded-xl text-white transition-all shadow-sm active:scale-95 cursor-pointer",
               isDestructive
                 ? "bg-red-600 hover:bg-red-500 shadow-red-600/20"
-                : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/20"
+                : "bg-[#1F1A16] hover:bg-black dark:bg-[#E6B86A] dark:text-[#181410] dark:hover:bg-[#F2C97E]"
             )}
           >
             {confirmText}

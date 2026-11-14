@@ -228,20 +228,26 @@ export function HowItWorksReconstructed() {
           </svg>
 
           <motion.div
-            initial={isOverlay ? "visible" : "hidden"}
+            initial={isOverlay ? false : "hidden"}
             animate={isOverlay ? "visible" : undefined}
             whileInView={isOverlay ? undefined : "visible"}
             viewport={{ once: true, amount: 0.25 }}
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.1 } },
-            }}
+            variants={
+              isOverlay
+                ? undefined
+                : {
+                    hidden: {},
+                    visible: { transition: { staggerChildren: 0.1 } },
+                  }
+            }
             style={{ transformStyle: 'preserve-3d' }}
             className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-7 relative z-10"
           >
             {STEPS.map((step, idx) => (
               <motion.div
                 key={step.num}
+                initial={isOverlay ? false : undefined}
+                animate={isOverlay ? { opacity: 1, y: 0, rotateX: 0, rotateY: 0 } : undefined}
                 style={
                   prefersReducedMotion
                     ? undefined
@@ -250,21 +256,25 @@ export function HowItWorksReconstructed() {
                         transformStyle: 'preserve-3d',
                       }
                 }
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                    y: 26,
-                    rotateX: 12,
-                    rotateY: step.enterRotateY,
-                  },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    rotateX: 0,
-                    rotateY: 0,
-                    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-                  },
-                }}
+                variants={
+                  isOverlay
+                    ? undefined
+                    : {
+                        hidden: {
+                          opacity: 0,
+                          y: 26,
+                          rotateX: 12,
+                          rotateY: step.enterRotateY,
+                        },
+                        visible: {
+                          opacity: 1,
+                          y: 0,
+                          rotateX: 0,
+                          rotateY: 0,
+                          transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+                        },
+                      }
+                }
                 className="relative"
               >
                 <Tilt3DCard

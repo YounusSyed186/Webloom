@@ -2,20 +2,16 @@
 
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import { 
   User, 
   MapPin, 
   Globe, 
   Mail, 
-  Phone, 
   CheckCircle2, 
   Plus, 
   Trash2, 
   Camera, 
-  Sparkles,
   Upload,
-  Layers
 } from 'lucide-react';
 import { 
   GithubIcon, 
@@ -34,6 +30,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast';
 import { SocialPlatform } from '@/types';
 import { validateImageFile, validateUsername, normalizeUsername } from '@/lib/validation';
+import { clsx } from 'clsx';
 
 export default function ProfilePage() {
   const { 
@@ -42,21 +39,21 @@ export default function ProfilePage() {
     updateProfile, 
     addSocialLink, 
     deleteSocialLink,
-    isSaving 
+    isSaving,
+    themeMode,
   } = useApp();
   const { success, error } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isDark = themeMode === 'dark';
 
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [username, setUsername] = useState(profile.username);
   const [headline, setHeadline] = useState(profile.headline || '');
   const [bio, setBio] = useState(profile.bio || '');
   const [avatar, setAvatar] = useState(profile.avatar || '');
-  const [coverImage, setCoverImage] = useState(profile.coverImage || '');
   const [location, setLocation] = useState(profile.location || '');
   const [website, setWebsite] = useState(profile.website || '');
   const [email, setEmail] = useState(profile.email || '');
-  const [phone, setPhone] = useState(profile.phone || '');
   const [verified, setVerified] = useState(profile.verified || false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
 
@@ -103,11 +100,9 @@ export default function ProfilePage() {
       headline: headline.trim() || undefined,
       bio: bio.trim() || undefined,
       avatar: avatar.trim() || undefined,
-      coverImage: coverImage.trim() || undefined,
       location: location.trim() || undefined,
       website: website.trim() || undefined,
       email: email.trim() || undefined,
-      phone: phone.trim() || undefined,
       verified,
     });
     success('Profile updated successfully!');
@@ -136,23 +131,47 @@ export default function ProfilePage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-white tracking-tight">Edit Profile</h2>
-        <p className="text-xs text-zinc-400 mt-0.5">
+        <h2 className="text-xl font-serif font-bold tracking-tight">Edit Profile</h2>
+        <p
+          className={clsx(
+            "text-xs mt-0.5",
+            isDark ? "text-[#A89F91]" : "text-[#786E62]"
+          )}
+        >
           Manage your digital bio, avatar photo, verified credentials, and linked social channels.
         </p>
       </div>
 
       <form onSubmit={handleSaveProfile} className="space-y-6">
-        {/* 1. Avatar and Cover */}
-        <div className="p-6 rounded-3xl bg-zinc-900/60 border border-zinc-800/80 space-y-4">
-          <h3 className="text-sm font-semibold text-white">Profile Photo</h3>
+        {/* 1. Avatar Photo */}
+        <div
+          className={clsx(
+            "p-6 rounded-3xl border space-y-4 transition-colors shadow-2xs",
+            isDark
+              ? "bg-[#1E1915] border-[#382F26]"
+              : "bg-[#F6F0E4] border-[#E5DEC9]"
+          )}
+        >
+          <h3 className="text-sm font-serif font-semibold">Profile Photo</h3>
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative group">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700/80 shadow-xl relative">
+              <div
+                className={clsx(
+                  "w-24 h-24 rounded-full overflow-hidden border-2 shadow-sm relative",
+                  isDark
+                    ? "bg-[#28211B] border-[#3E342B]"
+                    : "bg-[#EAE2D3] border-[#DACBB4]"
+                )}
+              >
                 {avatar ? (
                   <Image src={avatar} alt={displayName} fill className="object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white bg-blue-600">
+                  <div
+                    className={clsx(
+                      "w-full h-full flex items-center justify-center text-2xl font-bold",
+                      isDark ? "bg-[#E6B86A] text-[#181410]" : "bg-[#1F1A16] text-[#FAF6EE]"
+                    )}
+                  >
                     {displayName.charAt(0)}
                   </div>
                 )}
@@ -199,7 +218,7 @@ export default function ProfilePage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setAvatar('')}
-                    className="text-zinc-500 hover:text-red-400"
+                    className="text-red-500 hover:text-red-600"
                   >
                     Clear
                   </Button>
@@ -210,8 +229,15 @@ export default function ProfilePage() {
         </div>
 
         {/* 2. Core Bio Details */}
-        <div className="p-6 rounded-3xl bg-zinc-900/60 border border-zinc-800/80 space-y-4">
-          <h3 className="text-sm font-semibold text-white">Basic Information</h3>
+        <div
+          className={clsx(
+            "p-6 rounded-3xl border space-y-4 transition-colors shadow-2xs",
+            isDark
+              ? "bg-[#1E1915] border-[#382F26]"
+              : "bg-[#F6F0E4] border-[#E5DEC9]"
+          )}
+        >
+          <h3 className="text-sm font-serif font-semibold">Basic Information</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Display Name"
@@ -228,7 +254,7 @@ export default function ProfilePage() {
                 setUsername(e.target.value);
                 setUsernameError(null);
               }}
-              leftIcon={<span className="text-zinc-500 font-mono">@</span>}
+              leftIcon={<span className={isDark ? "text-[#85796C] font-mono" : "text-[#8E8272] font-mono"}>@</span>}
               error={usernameError || undefined}
               required
             />
@@ -273,31 +299,64 @@ export default function ProfilePage() {
           </div>
 
           {/* Verified Badge switch */}
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800 mt-2">
+          <div
+            className={clsx(
+              "flex items-center justify-between p-4 rounded-2xl border mt-2 transition-colors",
+              isDark
+                ? "bg-[#181411] border-[#382F26]"
+                : "bg-[#FAF6EE] border-[#DACBB4]"
+            )}
+          >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+              <div
+                className={clsx(
+                  "p-2 rounded-xl",
+                  isDark ? "bg-[#2E241B] text-[#E6B86A]" : "bg-[#FAF2E6] text-[#967137]"
+                )}
+              >
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs font-semibold text-white block">Verified Profile Badge</span>
-                <span className="text-[11px] text-zinc-400">Display verified checkmark badge next to your display name</span>
+                <span className="text-xs font-semibold block">Verified Profile Badge</span>
+                <span
+                  className={clsx(
+                    "text-[11px]",
+                    isDark ? "text-[#85796C]" : "text-[#8E8272]"
+                  )}
+                >
+                  Display verified checkmark badge next to your display name
+                </span>
               </div>
             </div>
             <input
               type="checkbox"
               checked={verified}
               onChange={e => setVerified(e.target.checked)}
-              className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 bg-zinc-800 border-zinc-700 cursor-pointer"
+              className="w-5 h-5 rounded cursor-pointer accent-[#C89D54]"
             />
           </div>
         </div>
 
         {/* 3. Social Profiles */}
-        <div className="p-6 rounded-3xl bg-zinc-900/60 border border-zinc-800/80 space-y-4">
+        <div
+          className={clsx(
+            "p-6 rounded-3xl border space-y-4 transition-colors shadow-2xs",
+            isDark
+              ? "bg-[#1E1915] border-[#382F26]"
+              : "bg-[#F6F0E4] border-[#E5DEC9]"
+          )}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-white">Social Channels</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Icons displayed at the top of your public profile</p>
+              <h3 className="text-sm font-serif font-semibold">Social Channels</h3>
+              <p
+                className={clsx(
+                  "text-xs mt-0.5",
+                  isDark ? "text-[#A89F91]" : "text-[#786E62]"
+                )}
+              >
+                Icons displayed at the top of your public profile
+              </p>
             </div>
             <Button
               type="button"
@@ -312,7 +371,14 @@ export default function ProfilePage() {
           </div>
 
           {socialLinks.length === 0 ? (
-            <p className="text-xs text-zinc-500 py-3 text-center">No social accounts connected yet. Add one above.</p>
+            <p
+              className={clsx(
+                "text-xs py-3 text-center",
+                isDark ? "text-[#85796C]" : "text-[#8E8272]"
+              )}
+            >
+              No social accounts connected yet. Add one above.
+            </p>
           ) : (
             <div className="space-y-2.5">
               {socialLinks.map(social => {
@@ -321,15 +387,32 @@ export default function ProfilePage() {
                 return (
                   <div
                     key={social.id}
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800 gap-3"
+                    className={clsx(
+                      "flex items-center justify-between p-3.5 rounded-2xl border gap-3 transition-colors",
+                      isDark
+                        ? "bg-[#181411] border-[#382F26]"
+                        : "bg-[#FAF6EE] border-[#DACBB4]"
+                    )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="p-2 rounded-xl bg-zinc-800 text-zinc-200">
+                      <div
+                        className={clsx(
+                          "p-2 rounded-xl",
+                          isDark ? "bg-[#28211B] text-[#F4EFE6]" : "bg-[#EAE2D3] text-[#1F1A16]"
+                        )}
+                      >
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <span className="text-xs font-semibold text-white capitalize block">{social.platform}</span>
-                        <span className="text-[11px] text-zinc-400 truncate block font-mono">{social.url}</span>
+                        <span className="text-xs font-semibold capitalize block">{social.platform}</span>
+                        <span
+                          className={clsx(
+                            "text-[11px] truncate block font-mono",
+                            isDark ? "text-[#85796C]" : "text-[#8E8272]"
+                          )}
+                        >
+                          {social.url}
+                        </span>
                       </div>
                     </div>
                     <button
@@ -338,7 +421,12 @@ export default function ProfilePage() {
                         deleteSocialLink(social.id);
                         success(`Removed ${social.platform} link`);
                       }}
-                      className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-zinc-800 transition-colors"
+                      className={clsx(
+                        "p-1.5 rounded-lg transition-colors cursor-pointer",
+                        isDark
+                          ? "text-[#85796C] hover:text-red-400 hover:bg-[#28211B]"
+                          : "text-[#8E8272] hover:text-red-600 hover:bg-[#EAE2D3]"
+                      )}
                       title="Delete social link"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -367,7 +455,14 @@ export default function ProfilePage() {
       >
         <form onSubmit={handleAddSocial} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-2">Platform</label>
+            <label
+              className={clsx(
+                "block text-xs font-medium mb-2",
+                isDark ? "text-[#C8BDB0]" : "text-[#544B41]"
+              )}
+            >
+              Platform
+            </label>
             <div className="grid grid-cols-3 gap-2">
               {platforms.map(p => {
                 const Icon = p.icon;
@@ -376,11 +471,16 @@ export default function ProfilePage() {
                     key={p.id}
                     type="button"
                     onClick={() => setSelectedPlatform(p.id)}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all ${
+                    className={clsx(
+                      "flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer",
                       selectedPlatform === p.id
-                        ? 'bg-blue-600/20 border-blue-500 text-blue-300'
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                    }`}
+                        ? isDark
+                          ? "bg-[#33281E] border-[#E6B86A] text-[#E6B86A] font-semibold"
+                          : "bg-[#FAF2E6] border-[#C89D54] text-[#865E24] font-semibold"
+                        : isDark
+                        ? "bg-[#181411] border-[#382F26] text-[#A89F91] hover:text-[#F4EFE6]"
+                        : "bg-[#FAF6EE] border-[#DACBB4] text-[#6E6254] hover:text-[#1F1A16]"
+                    )}
                   >
                     <Icon className="w-3.5 h-3.5" />
                     <span>{p.label}</span>

@@ -3,14 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Link as LinkIcon, Palette, User, FolderGit2, BarChart3, Settings, Eye, Plus, Sparkles, ExternalLink } from 'lucide-react';
+import { Search, Link as LinkIcon, Palette, User, FolderGit2, BarChart3, Settings, ExternalLink, Sparkles } from 'lucide-react';
 import { useApp } from '@/lib/context/app-context';
+import { clsx } from 'clsx';
 
 export function CommandMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const router = useRouter();
-  const { profile } = useApp();
+  const { profile, themeMode } = useApp();
+  const isDark = themeMode === 'dark';
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -30,56 +32,56 @@ export function CommandMenu() {
     {
       id: 'overview',
       name: 'Dashboard Overview',
-      icon: <Sparkles className="w-4 h-4 text-blue-400" />,
+      icon: <Sparkles className="w-4 h-4 text-amber-500" />,
       action: () => { router.push('/dashboard'); setIsOpen(false); },
       group: 'Navigation',
     },
     {
       id: 'links',
       name: 'Manage Links',
-      icon: <LinkIcon className="w-4 h-4 text-indigo-400" />,
+      icon: <LinkIcon className="w-4 h-4 text-emerald-500" />,
       action: () => { router.push('/dashboard/links'); setIsOpen(false); },
       group: 'Navigation',
     },
     {
       id: 'appearance',
       name: 'Appearance & Themes',
-      icon: <Palette className="w-4 h-4 text-pink-400" />,
+      icon: <Palette className="w-4 h-4 text-rose-500" />,
       action: () => { router.push('/dashboard/appearance'); setIsOpen(false); },
       group: 'Navigation',
     },
     {
       id: 'profile',
       name: 'Edit Profile & Socials',
-      icon: <User className="w-4 h-4 text-amber-400" />,
+      icon: <User className="w-4 h-4 text-orange-500" />,
       action: () => { router.push('/dashboard/profile'); setIsOpen(false); },
       group: 'Navigation',
     },
     {
       id: 'projects',
       name: 'Portfolio Projects',
-      icon: <FolderGit2 className="w-4 h-4 text-emerald-400" />,
+      icon: <FolderGit2 className="w-4 h-4 text-teal-500" />,
       action: () => { router.push('/dashboard/projects'); setIsOpen(false); },
       group: 'Navigation',
     },
     {
       id: 'analytics',
       name: 'View Analytics & Insights',
-      icon: <BarChart3 className="w-4 h-4 text-purple-400" />,
+      icon: <BarChart3 className="w-4 h-4 text-indigo-500" />,
       action: () => { router.push('/dashboard/analytics'); setIsOpen(false); },
       group: 'Navigation',
     },
     {
       id: 'settings',
       name: 'Settings & Account',
-      icon: <Settings className="w-4 h-4 text-zinc-400" />,
+      icon: <Settings className="w-4 h-4 text-stone-400" />,
       action: () => { router.push('/dashboard/settings'); setIsOpen(false); },
       group: 'Navigation',
     },
     {
       id: 'public_page',
       name: `View Public Profile (@${profile.username})`,
-      icon: <ExternalLink className="w-4 h-4 text-cyan-400" />,
+      icon: <ExternalLink className="w-4 h-4 text-amber-500" />,
       action: () => { window.open(`/${profile.username}`, '_blank'); setIsOpen(false); },
       group: 'Actions',
     },
@@ -98,7 +100,7 @@ export function CommandMenu() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             onClick={() => setIsOpen(false)}
           />
 
@@ -107,42 +109,93 @@ export function CommandMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden z-10"
+            className={clsx(
+              "relative w-full max-w-lg border rounded-2xl shadow-2xl overflow-hidden z-10 transition-colors duration-200",
+              isDark
+                ? "bg-[#1E1915] border-[#3E342A] text-[#F4EFE6]"
+                : "bg-[#FAF6EE] border-[#DACBB4] text-[#1F1A16]"
+            )}
           >
             {/* Search Input */}
-            <div className="flex items-center px-4 border-b border-zinc-800/80">
-              <Search className="w-4 h-4 text-zinc-400 mr-2.5" />
+            <div
+              className={clsx(
+                "flex items-center px-4 border-b",
+                isDark ? "border-[#332B23]" : "border-[#EAE2D3]"
+              )}
+            >
+              <Search
+                className={clsx(
+                  "w-4 h-4 mr-2.5",
+                  isDark ? "text-[#85796C]" : "text-[#8E8272]"
+                )}
+              />
               <input
                 type="text"
                 autoFocus
                 placeholder="Type a command or search page... (e.g. Links, Appearance)"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                className="w-full bg-transparent py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none"
+                className={clsx(
+                  "w-full bg-transparent py-3.5 text-sm focus:outline-none",
+                  isDark
+                    ? "text-[#F4EFE6] placeholder-[#6E6356]"
+                    : "text-[#1F1A16] placeholder-[#A49685]"
+                )}
               />
-              <span className="text-[10px] font-mono text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-700">ESC</span>
+              <span
+                className={clsx(
+                  "text-[10px] font-mono px-1.5 py-0.5 rounded border",
+                  isDark
+                    ? "text-[#85796C] bg-[#26201B] border-[#3E342A]"
+                    : "text-[#8E8272] bg-[#EAE2D3] border-[#DACBB4]"
+                )}
+              >
+                ESC
+              </span>
             </div>
 
             {/* List */}
             <div className="max-h-72 overflow-y-auto p-2 space-y-1">
               {filtered.length === 0 ? (
-                <p className="p-4 text-center text-xs text-zinc-500">No matching commands found.</p>
+                <p
+                  className={clsx(
+                    "p-4 text-center text-xs",
+                    isDark ? "text-[#85796C]" : "text-[#8E8272]"
+                  )}
+                >
+                  No matching commands found.
+                </p>
               ) : (
                 filtered.map(item => (
                   <button
                     key={item.id}
                     onClick={item.action}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-zinc-800/80 text-left transition-colors group"
+                    className={clsx(
+                      "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-colors group cursor-pointer",
+                      isDark
+                        ? "hover:bg-[#28211B] text-[#C8BDB0] hover:text-[#F4EFE6]"
+                        : "hover:bg-[#EFE7DA] text-[#544B41] hover:text-[#1F1A16]"
+                    )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
+                      <div
+                        className={clsx(
+                          "p-1.5 rounded-lg transition-colors",
+                          isDark ? "bg-[#26201B] group-hover:bg-[#332B23]" : "bg-[#EAE2D3] group-hover:bg-[#DFD5C4]"
+                        )}
+                      >
                         {item.icon}
                       </div>
-                      <span className="text-xs font-medium text-zinc-200 group-hover:text-white">
+                      <span className="text-xs font-medium">
                         {item.name}
                       </span>
                     </div>
-                    <span className="text-[10px] font-medium text-zinc-500 bg-zinc-800/60 px-2 py-0.5 rounded">
+                    <span
+                      className={clsx(
+                        "text-[10px] font-medium px-2 py-0.5 rounded",
+                        isDark ? "text-[#85796C] bg-[#241F1A]" : "text-[#8E8272] bg-[#E5DEC9]"
+                      )}
+                    >
                       {item.group}
                     </span>
                   </button>
@@ -150,9 +203,16 @@ export function CommandMenu() {
               )}
             </div>
 
-            <div className="flex items-center justify-between px-4 py-2 border-t border-zinc-800/80 bg-zinc-950/40 text-[11px] text-zinc-500">
+            <div
+              className={clsx(
+                "flex items-center justify-between px-4 py-2 border-t text-[11px]",
+                isDark
+                  ? "border-[#332B23] bg-[#181411] text-[#85796C]"
+                  : "border-[#EAE2D3] bg-[#F6F0E4] text-[#8E8272]"
+              )}
+            >
               <span>Navigate with quick shortcuts</span>
-              <span>Press <kbd className="text-zinc-400 font-mono">⌘K</kbd> anytime</span>
+              <span>Press <kbd className="font-mono font-semibold">⌘K</kbd> anytime</span>
             </div>
           </motion.div>
         </div>

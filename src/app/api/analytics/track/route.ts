@@ -3,11 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { profileId, linkId, eventType, referrer, device, country } = body;
+    const { profileId, profile_id, handle, linkId, link_id, eventType, event_type, referrer, device, country } = body;
 
-    if (!profileId || !eventType) {
-      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
-    }
+    const finalProfileId = profileId || profile_id || (handle ? `prof_${handle}` : 'prof_younus_101');
+    const finalEventType = eventType || event_type || 'PAGE_VIEW';
 
     const userAgent = request.headers.get('user-agent') || '';
     const isMobile = /mobile|iphone|android|ipad/i.test(userAgent);
@@ -30,9 +29,9 @@ export async function POST(request: NextRequest) {
 
     const event = {
       id: `evt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      profileId,
-      linkId: linkId || null,
-      eventType,
+      profileId: finalProfileId,
+      linkId: linkId || link_id || null,
+      eventType: finalEventType,
       referrer: parsedReferrer,
       device: detectedDevice,
       country: clientCountry,

@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import { 
   Plus, 
   Search, 
@@ -46,6 +45,7 @@ import { Dialog, ConfirmDialog } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast';
 import { Link, LinkType } from '@/types';
 import { isSafeUrl, sanitizeUrl, validateImageFile } from '@/lib/validation';
+import { clsx } from 'clsx';
 
 // Sortable Link Item Component
 function SortableLinkItem({
@@ -54,12 +54,14 @@ function SortableLinkItem({
   onDuplicate,
   onDelete,
   onToggleActive,
+  isDark,
 }: {
   link: Link;
   onEdit: (link: Link) => void;
   onDuplicate: (link: Link) => void;
   onDelete: (id: string) => void;
   onToggleActive: (id: string, active: boolean) => void;
+  isDark: boolean;
 }) {
   const {
     attributes,
@@ -76,42 +78,62 @@ function SortableLinkItem({
   };
 
   const getLinkIcon = () => {
-    if (link.type === 'file') return <FileText className="w-4 h-4 text-emerald-400" />;
-    if (link.type === 'video') return <Video className="w-4 h-4 text-red-400" />;
-    if (link.type === 'product') return <ShoppingBag className="w-4 h-4 text-amber-400" />;
-    if (link.type === 'article') return <Newspaper className="w-4 h-4 text-purple-400" />;
-    return <Globe className="w-4 h-4 text-blue-400" />;
+    if (link.type === 'file') return <FileText className="w-4 h-4 text-emerald-500" />;
+    if (link.type === 'video') return <Video className="w-4 h-4 text-rose-500" />;
+    if (link.type === 'product') return <ShoppingBag className="w-4 h-4 text-amber-500" />;
+    if (link.type === 'article') return <Newspaper className="w-4 h-4 text-purple-500" />;
+    return <Globe className={clsx("w-4 h-4", isDark ? "text-[#E6B86A]" : "text-[#967137]")} />;
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`p-4 rounded-2xl bg-zinc-900/80 border transition-all duration-200 flex items-center justify-between gap-3 ${
+      className={clsx(
+        "p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-3 shadow-2xs",
         isDragging
-          ? 'border-blue-500 shadow-2xl bg-zinc-800 scale-[1.02] z-30'
+          ? isDark
+            ? "border-[#E6B86A] shadow-2xl bg-[#28211B] scale-[1.02] z-30"
+            : "border-[#C89D54] shadow-2xl bg-[#EFE7DA] scale-[1.02] z-30"
           : link.isActive
-          ? 'border-zinc-800 hover:border-zinc-700'
-          : 'border-zinc-800/40 opacity-60 bg-zinc-950/40'
-      }`}
+          ? isDark
+            ? "bg-[#1E1915] border-[#382F26] hover:border-[#4E4135]"
+            : "bg-[#F6F0E4] border-[#E5DEC9] hover:border-[#DACBB4]"
+          : isDark
+          ? "border-[#382F26]/40 opacity-60 bg-[#15120F]"
+          : "border-[#E5DEC9]/50 opacity-60 bg-[#EAE2D3]/40"
+      )}
     >
       {/* Drag handle & Thumbnail */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing p-1 text-zinc-500 hover:text-zinc-300 rounded touch-none"
+          className={clsx(
+            "cursor-grab active:cursor-grabbing p-1 rounded touch-none transition-colors",
+            isDark ? "text-[#85796C] hover:text-[#C8BDB0]" : "text-[#8E8272] hover:text-[#1F1A16]"
+          )}
           title="Drag to reorder"
         >
           <GripVertical className="w-4 h-4" />
         </button>
 
         {link.thumbnail ? (
-          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-zinc-800 border border-zinc-700/60 flex-shrink-0">
+          <div
+            className={clsx(
+              "relative w-10 h-10 rounded-xl overflow-hidden border flex-shrink-0",
+              isDark ? "bg-[#28211B] border-[#3E342B]" : "bg-[#EAE2D3] border-[#DACBB4]"
+            )}
+          >
             <Image src={link.thumbnail} alt={link.title} fill className="object-cover" />
           </div>
         ) : (
-          <div className="p-2.5 rounded-xl bg-zinc-800 border border-zinc-700/50 flex-shrink-0">
+          <div
+            className={clsx(
+              "p-2.5 rounded-xl border flex-shrink-0",
+              isDark ? "bg-[#28211B] border-[#3E342B]" : "bg-[#EAE2D3] border-[#DACBB4]"
+            )}
+          >
             {getLinkIcon()}
           </div>
         )}
@@ -119,23 +141,38 @@ function SortableLinkItem({
         {/* Title & Info */}
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-semibold text-white truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
+            <h4 className="text-sm font-semibold truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
               {link.title}
             </h4>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 uppercase">
+            <span
+              className={clsx(
+                "text-[10px] font-mono px-1.5 py-0.5 rounded uppercase",
+                isDark ? "bg-[#28211B] text-[#85796C]" : "bg-[#EAE2D3] text-[#786E62]"
+              )}
+            >
               {link.type}
             </span>
           </div>
-          <p className="text-xs text-zinc-400 truncate max-w-[200px] sm:max-w-xs md:max-w-sm font-mono mt-0.5">
+          <p
+            className={clsx(
+              "text-xs truncate max-w-[200px] sm:max-w-xs md:max-w-sm font-mono mt-0.5",
+              isDark ? "text-[#85796C]" : "text-[#786E62]"
+            )}
+          >
             {link.url}
           </p>
-          <div className="flex items-center gap-3 text-[11px] text-zinc-500 mt-1">
+          <div
+            className={clsx(
+              "flex items-center gap-3 text-[11px] mt-1",
+              isDark ? "text-[#85796C]" : "text-[#8E8272]"
+            )}
+          >
             <span className="flex items-center gap-1 font-mono">
-              <MousePointerClick className="w-3 h-3 text-blue-400" />
+              <MousePointerClick className={clsx("w-3 h-3", isDark ? "text-[#E6B86A]" : "text-[#967137]")} />
               {(link.clickCount || 0).toLocaleString()} clicks
             </span>
             <span>•</span>
-            <span className={link.isActive ? 'text-emerald-400 font-medium' : 'text-zinc-500'}>
+            <span className={link.isActive ? 'text-emerald-500 font-medium' : ''}>
               {link.isActive ? '● Active' : '○ Hidden'}
             </span>
           </div>
@@ -147,11 +184,16 @@ function SortableLinkItem({
         {/* Toggle Active */}
         <button
           onClick={() => onToggleActive(link.id, !link.isActive)}
-          className={`p-2 rounded-xl border transition-colors ${
+          className={clsx(
+            "p-2 rounded-xl border transition-colors cursor-pointer",
             link.isActive
-              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
-              : 'text-zinc-500 bg-zinc-800 border-zinc-700 hover:text-zinc-300'
-          }`}
+              ? isDark
+                ? "text-[#87B99B] bg-[#1C2820] border-[#2E4235] hover:bg-[#25362B]"
+                : "text-[#48735A] bg-[#E2EDE5] border-[#C4DAC9] hover:bg-[#D4E4D8]"
+              : isDark
+              ? "text-[#85796C] bg-[#221C17] border-[#382F26] hover:text-[#C8BDB0]"
+              : "text-[#8E8272] bg-[#EAE2D3] border-[#DACBB4] hover:text-[#1F1A16]"
+          )}
           title={link.isActive ? 'Hide link from public profile' : 'Show link on public profile'}
         >
           {link.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -160,7 +202,12 @@ function SortableLinkItem({
         {/* Duplicate Button */}
         <button
           onClick={() => onDuplicate(link)}
-          className="p-2 rounded-xl text-zinc-400 hover:text-white bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/60 transition-colors hidden sm:block"
+          className={clsx(
+            "p-2 rounded-xl border transition-colors hidden sm:block cursor-pointer",
+            isDark
+              ? "text-[#A89F91] hover:text-[#F4EFE6] bg-[#221C17] hover:bg-[#2C241E] border-[#382F26]"
+              : "text-[#6E6254] hover:text-[#1F1A16] bg-[#FAF6EE] hover:bg-[#EFE7DA] border-[#E5DEC9]"
+          )}
           title="Duplicate link"
         >
           <Copy className="w-4 h-4" />
@@ -169,7 +216,12 @@ function SortableLinkItem({
         {/* Edit Button */}
         <button
           onClick={() => onEdit(link)}
-          className="p-2 rounded-xl text-zinc-400 hover:text-white bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/60 transition-colors"
+          className={clsx(
+            "p-2 rounded-xl border transition-colors cursor-pointer",
+            isDark
+              ? "text-[#A89F91] hover:text-[#F4EFE6] bg-[#221C17] hover:bg-[#2C241E] border-[#382F26]"
+              : "text-[#6E6254] hover:text-[#1F1A16] bg-[#FAF6EE] hover:bg-[#EFE7DA] border-[#E5DEC9]"
+          )}
           title="Edit link"
         >
           <Edit3 className="w-4 h-4" />
@@ -178,7 +230,12 @@ function SortableLinkItem({
         {/* Delete Button */}
         <button
           onClick={() => onDelete(link.id)}
-          className="p-2 rounded-xl text-zinc-400 hover:text-red-400 bg-zinc-800/80 hover:bg-red-500/10 hover:border-red-500/30 border border-zinc-700/60 transition-colors"
+          className={clsx(
+            "p-2 rounded-xl border transition-colors cursor-pointer",
+            isDark
+              ? "text-red-400 hover:text-red-300 bg-[#2E1815] border-[#4A2622] hover:bg-[#3D1E1A]"
+              : "text-red-600 hover:text-red-700 bg-red-50 border-red-200 hover:bg-red-100"
+          )}
           title="Delete link"
         >
           <Trash2 className="w-4 h-4" />
@@ -188,10 +245,10 @@ function SortableLinkItem({
   );
 }
 
-export default function LinksPage() {
-  const { links, addLink, updateLink, deleteLink, reorderLinks } = useApp();
+export default function DashboardLinksPage() {
+  const { links, addLink, updateLink, deleteLink, reorderLinks, themeMode } = useApp();
   const { success, error } = useToast();
-  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const isDark = themeMode === 'dark';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
@@ -199,7 +256,7 @@ export default function LinksPage() {
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [deletingLinkId, setDeletingLinkId] = useState<string | null>(null);
 
-  // Modal form states
+  // Form state
   const [formTitle, setFormTitle] = useState('');
   const [formUrl, setFormUrl] = useState('');
   const [formDescription, setFormDescription] = useState('');
@@ -209,19 +266,30 @@ export default function LinksPage() {
   const [formIsActive, setFormIsActive] = useState(true);
   const [formPrice, setFormPrice] = useState('');
 
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = links.findIndex(item => item.id === active.id);
-      const newIndex = links.findIndex(item => item.id === over.id);
-      const reordered = arrayMove(links, oldIndex, newIndex);
-      reorderLinks(reordered);
-      success('Links reordered successfully');
+      const oldIndex = links.findIndex(i => i.id === active.id);
+      const newIndex = links.findIndex(i => i.id === over.id);
+      const newLinks = arrayMove(links, oldIndex, newIndex).map((item, idx) => ({
+        ...item,
+        sortOrder: idx,
+      }));
+      reorderLinks(newLinks);
+      success('Link order updated');
     }
   };
 
@@ -229,14 +297,14 @@ export default function LinksPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const check = validateImageFile(file);
-    if (!check.valid) {
-      error(check.error || 'Invalid image file');
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      error(validation.error || 'Invalid file type');
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onloadend = () => {
       if (typeof reader.result === 'string') {
         setFormThumbnail(reader.result);
         success('Thumbnail image uploaded!');
@@ -350,8 +418,13 @@ export default function LinksPage() {
       {/* Header with Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Your Links</h2>
-          <p className="text-xs text-zinc-400 mt-0.5">
+          <h2 className="text-xl font-serif font-bold tracking-tight">Your Links</h2>
+          <p
+            className={clsx(
+              "text-xs mt-0.5",
+              isDark ? "text-[#A89F91]" : "text-[#786E62]"
+            )}
+          >
             Add, edit, duplicate, and drag-and-drop to reorder links on your public profile.
           </p>
         </div>
@@ -376,11 +449,16 @@ export default function LinksPage() {
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium capitalize whitespace-nowrap transition-colors ${
+              className={clsx(
+                "px-3 py-1.5 rounded-xl text-xs font-medium capitalize whitespace-nowrap transition-colors cursor-pointer",
                 filterType === type
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-              }`}
+                  ? isDark
+                    ? "bg-[#E6B86A] text-[#181410] font-semibold shadow-xs"
+                    : "bg-[#1F1A16] text-[#FAF6EE] font-semibold shadow-xs"
+                  : isDark
+                  ? "bg-[#221C17] text-[#A89F91] hover:text-[#F4EFE6] border border-[#382F26]"
+                  : "bg-[#F6F0E4] text-[#6E6254] hover:text-[#1F1A16] border border-[#E5DEC9]"
+              )}
             >
               {type}
             </button>
@@ -390,12 +468,31 @@ export default function LinksPage() {
 
       {/* Links List / DnD Container */}
       {filteredLinks.length === 0 ? (
-        <div className="p-12 text-center rounded-3xl bg-zinc-900/40 border border-zinc-800/80 space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
+        <div
+          className={clsx(
+            "p-12 text-center rounded-3xl border space-y-3 transition-colors",
+            isDark
+              ? "bg-[#1E1915]/50 border-[#382F26]"
+              : "bg-[#F6F0E4]/60 border-[#E5DEC9]"
+          )}
+        >
+          <div
+            className={clsx(
+              "w-12 h-12 rounded-2xl border flex items-center justify-center mx-auto",
+              isDark
+                ? "bg-[#28211B] border-[#3E342B] text-[#E6B86A]"
+                : "bg-[#EAE2D3] border-[#DACBB4] text-[#967137]"
+            )}
+          >
             <Globe className="w-6 h-6" />
           </div>
-          <h3 className="text-sm font-semibold text-white">No links found</h3>
-          <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+          <h3 className="text-sm font-serif font-semibold">No links found</h3>
+          <p
+            className={clsx(
+              "text-xs max-w-sm mx-auto",
+              isDark ? "text-[#A89F91]" : "text-[#786E62]"
+            )}
+          >
             {searchQuery
               ? 'Try changing your search query or filter settings.'
               : 'Your profile is waiting for its first link. Add your first link to get started.'}
@@ -424,6 +521,7 @@ export default function LinksPage() {
                   onDuplicate={handleDuplicate}
                   onDelete={id => setDeletingLinkId(id)}
                   onToggleActive={(id, active) => updateLink(id, { isActive: active })}
+                  isDark={isDark}
                 />
               ))}
             </div>
@@ -465,7 +563,14 @@ export default function LinksPage() {
 
           {/* Link Type Selector */}
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1.5">Link Type</label>
+            <label
+              className={clsx(
+                "block text-xs font-medium mb-1.5",
+                isDark ? "text-[#C8BDB0]" : "text-[#544B41]"
+              )}
+            >
+              Link Type
+            </label>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { type: 'url', label: 'Standard URL' },
@@ -479,11 +584,16 @@ export default function LinksPage() {
                   type="button"
                   key={item.type}
                   onClick={() => setFormType(item.type as LinkType)}
-                  className={`p-2.5 rounded-xl border text-xs font-medium text-center transition-all ${
+                  className={clsx(
+                    "p-2.5 rounded-xl border text-xs font-medium text-center transition-all cursor-pointer",
                     formType === item.type
-                      ? 'bg-blue-600/20 border-blue-500 text-blue-300'
-                      : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                  }`}
+                      ? isDark
+                        ? "bg-[#33281E] border-[#E6B86A] text-[#E6B86A] font-semibold"
+                        : "bg-[#FAF2E6] border-[#C89D54] text-[#865E24] font-semibold"
+                      : isDark
+                      ? "bg-[#181411] border-[#382F26] text-[#A89F91] hover:text-[#F4EFE6]"
+                      : "bg-[#FAF6EE] border-[#DACBB4] text-[#6E6254] hover:text-[#1F1A16]"
+                  )}
                 >
                   {item.label}
                 </button>
@@ -524,7 +634,7 @@ export default function LinksPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setFormThumbnail('')}
-                  className="text-xs text-zinc-500 hover:text-red-400"
+                  className="text-xs text-red-500 hover:text-red-600"
                 >
                   Remove
                 </Button>
@@ -540,23 +650,37 @@ export default function LinksPage() {
           </div>
 
           {/* Options Switches */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/60 border border-zinc-800 text-xs">
-            <span className="text-zinc-300 font-medium">Open in new tab</span>
+          <div
+            className={clsx(
+              "flex items-center justify-between p-3 rounded-xl border text-xs transition-colors",
+              isDark
+                ? "bg-[#181411] border-[#382F26]"
+                : "bg-[#FAF6EE] border-[#DACBB4]"
+            )}
+          >
+            <span className="font-medium">Open in new tab</span>
             <input
               type="checkbox"
               checked={formOpenInNewTab}
               onChange={e => setFormOpenInNewTab(e.target.checked)}
-              className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 bg-zinc-800 border-zinc-700 cursor-pointer"
+              className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer accent-[#C89D54]"
             />
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/60 border border-zinc-800 text-xs">
-            <span className="text-zinc-300 font-medium">Visible on public profile</span>
+          <div
+            className={clsx(
+              "flex items-center justify-between p-3 rounded-xl border text-xs transition-colors",
+              isDark
+                ? "bg-[#181411] border-[#382F26]"
+                : "bg-[#FAF6EE] border-[#DACBB4]"
+            )}
+          >
+            <span className="font-medium">Visible on public profile</span>
             <input
               type="checkbox"
               checked={formIsActive}
               onChange={e => setFormIsActive(e.target.checked)}
-              className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 bg-zinc-800 border-zinc-700 cursor-pointer"
+              className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 cursor-pointer accent-[#C89D54]"
             />
           </div>
 

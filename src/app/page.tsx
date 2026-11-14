@@ -130,7 +130,8 @@ function WebloomHomeContent() {
             <div
               aria-hidden="true"
               data-webloom-dark-replica="true"
-              className={`webloom-dark-replica-mask absolute inset-0 z-20 w-full pointer-events-none select-none overflow-hidden ${
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, width: '100%' }}
+              className={`webloom-dark-replica-mask z-20 w-full pointer-events-none select-none overflow-hidden ${
                 isDarkMode ? 'bg-[#FAF6EE] text-[#1F1A16]' : 'bg-[#161310] text-[#F4EFE6]'
               }`}
             >

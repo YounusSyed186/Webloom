@@ -236,3 +236,134 @@ VALUES
   ('a0000000-0000-0000-0000-000000000001', 'New link "Interactive Portfolio & Work" published', 'link', NOW() - INTERVAL '3 days'),
   ('a0000000-0000-0000-0000-000000000001', 'Added project "Agentic Studio AI"', 'project', NOW() - INTERVAL '4 days')
 ON CONFLICT DO NOTHING;
+
+
+-- 7. Insert Organization & Workspace
+INSERT INTO public.organizations (id, name, slug, owner_id)
+VALUES ('10000000-0000-0000-0000-000000000001', 'Younus Studio', 'younus-studio', 'a0000000-0000-0000-0000-000000000001')
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO public.workspaces (id, organization_id, name, slug, is_default)
+VALUES ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'Default Workspace', 'default', true)
+ON CONFLICT DO NOTHING;
+
+-- Link profile to workspace
+UPDATE public.profiles
+SET workspace_id = '20000000-0000-0000-0000-000000000001'
+WHERE id = 'a0000000-0000-0000-0000-000000000001';
+
+-- 8. Insert Digital Products
+INSERT INTO public.products (id, profile_id, title, slug, description, product_type, price_inr, price_usd, currency, cover_image_url, download_file_url, sales_count, is_active)
+VALUES 
+  (
+    '30000000-0000-0000-0000-000000000001',
+    'a0000000-0000-0000-0000-000000000001',
+    'Next.js 15 Production SaaS Starter Kit',
+    'nextjs-15-saas-starter',
+    'Battle-tested Next.js App Router codebase with Supabase authentication, multi-tenant workspace isolation, Stripe checkout, and Tailwind CSS.',
+    'digital_download',
+    999,
+    14,
+    'INR',
+    'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&auto=format&fit=crop&q=80',
+    'https://downloads.webloom.site/packages/nextjs15-enterprise-saas-v2.zip',
+    142,
+    true
+  ),
+  (
+    '30000000-0000-0000-0000-000000000002',
+    'a0000000-0000-0000-0000-000000000001',
+    'Autonomous AI Agents Blueprint & Prompts',
+    'ai-agents-blueprint',
+    'System prompts, routing patterns, and code recipes for building production-grade LLM agents.',
+    'digital_download',
+    499,
+    7,
+    'INR',
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=80',
+    'https://downloads.webloom.site/packages/agentic-ai-blueprints.pdf',
+    89,
+    true
+  )
+ON CONFLICT DO NOTHING;
+
+-- 9. Insert Page Blocks
+INSERT INTO public.page_blocks (id, profile_id, block_type, title, subtitle, config, is_active, is_pinned, sort_order)
+VALUES
+  (
+    '40000000-0000-0000-0000-000000000001',
+    'a0000000-0000-0000-0000-000000000001',
+    'heading',
+    'Featured Resources & Downloads',
+    'Free tools and open-source project boilerplates',
+    '{}'::jsonb,
+    true,
+    false,
+    0
+  ),
+  (
+    '40000000-0000-0000-0000-000000000002',
+    'a0000000-0000-0000-0000-000000000001',
+    'product',
+    'Next.js 15 Production SaaS Starter Kit',
+    'Full-stack boilerplate with Supabase Auth, Stripe, and Tailwind v4',
+    '{"price": 999, "currency": "INR", "originalPrice": 1999, "badge": "Bestseller", "downloadUrl": "https://downloads.webloom.site/packages/nextjs15-enterprise-saas-v2.zip"}'::jsonb,
+    true,
+    true,
+    1
+  ),
+  (
+    '40000000-0000-0000-0000-000000000003',
+    'a0000000-0000-0000-0000-000000000001',
+    'countdown',
+    'Next Cohort: AI Agents Masterclass Launch',
+    'Early bird registration closes in:',
+    '{"targetDate": "2026-11-30T23:59:59Z", "ctaText": "Claim Early Bird Pass (₹499)", "ctaUrl": "https://webloom.site/younus/checkout/cohort"}'::jsonb,
+    true,
+    false,
+    2
+  ),
+  (
+    '40000000-0000-0000-0000-000000000004',
+    'a0000000-0000-0000-0000-000000000001',
+    'newsletter',
+    'Join The Webloom Creator Dispatch',
+    'Weekly teardowns on creator monetization, AI tools, and frontend engineering.',
+    '{"placeholder": "Enter your email address...", "buttonText": "Subscribe", "disclaimer": "No spam. One-click unsubscribe anytime."}'::jsonb,
+    true,
+    false,
+    3
+  ),
+  (
+    '40000000-0000-0000-0000-000000000005',
+    'a0000000-0000-0000-0000-000000000001',
+    'booking',
+    'Book a 1:1 Engineering Advisory Call',
+    'Architecture review, frontend performance audit, or startup advisory session with Younus.',
+    '{"durationMinutes": 45, "price": 2499, "currency": "INR", "availability": ["Mon", "Wed", "Fri"]}'::jsonb,
+    true,
+    false,
+    4
+  )
+ON CONFLICT DO NOTHING;
+
+-- 10. Insert Subscribers
+INSERT INTO public.subscribers (profile_id, email, name, source, tags, is_active, consent_given)
+VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'marcus.vance@ambientlabs.com', 'Marcus Vance', 'Newsletter Block', '["newsletter", "engineering", "early-adopter"]'::jsonb, true, true),
+  ('a0000000-0000-0000-0000-000000000001', 'charlotte.dupont@sorbonne.fr', 'Charlotte Dupont', 'Public Profile', '["newsletter", "design"]'::jsonb, true, true),
+  ('a0000000-0000-0000-0000-000000000001', 'rahul.deshmukh@hypergrowth.co', 'Rahul Deshmukh', 'Lead Magnet', '["customer", "saas-starter", "vip"]'::jsonb, true, true)
+ON CONFLICT DO NOTHING;
+
+-- 11. Insert Services & Bookings
+INSERT INTO public.services (id, profile_id, title, description, duration_minutes, price_inr, currency, is_active)
+VALUES
+  ('50000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', '1:1 Technical Architecture Consultation', 'Deep dive into your Next.js and Supabase database architecture.', 45, 2499, 'INR', true),
+  ('50000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'Frontend Performance Audit & Quick Fixes', 'Targeted performance audit of Core Web Vitals (LCP, INP, CLS).', 20, 999, 'INR', true)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.bookings (id, profile_id, service_id, client_name, client_email, scheduled_at, duration_minutes, status, notes)
+VALUES
+  ('60000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'Sarah Jenkins', 'sarah.jenkins@fintechprime.com', '2026-11-12T15:00:00Z', 45, 'confirmed', 'Architecture review and database optimization session.'),
+  ('60000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000002', 'Arjun Mehta', 'arjun.mehta@devstudio.in', '2026-11-15T11:00:00Z', 20, 'confirmed', 'Core Web Vitals and LCP audit.')
+ON CONFLICT DO NOTHING;
