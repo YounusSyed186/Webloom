@@ -33,7 +33,7 @@ import {
   INITIAL_SERVICES,
   INITIAL_BOOKINGS
 } from './mock-data';
-import { supabase } from './supabase/client';
+import { supabase, isSupabaseConfigured } from './supabase/client';
 import { aggregateAnalytics } from './analytics';
 import { normalizeUsername, validateUsername } from './validation';
 
@@ -925,16 +925,18 @@ export class LinkedTreeStore {
     this.setStored(KEYS.EVENTS, events);
 
     // Sync to Supabase analytics_events table
-    try {
-      supabase.from('analytics_events').insert({
-        profile_id: event.profileId,
-        event_type: event.eventType,
-        referrer: event.referrer,
-        device: event.device,
-        country: event.country,
-        timestamp: event.timestamp,
-      }).then(() => {});
-    } catch {}
+    if (isSupabaseConfigured) {
+      try {
+        supabase.from('analytics_events').insert({
+          profile_id: event.profileId,
+          event_type: event.eventType,
+          referrer: event.referrer,
+          device: event.device,
+          country: event.country,
+          timestamp: event.timestamp,
+        }).then(() => {});
+      } catch {}
+    }
   }
 
   public static trackLinkClick(linkId: string, profileId?: string): void {
@@ -962,15 +964,17 @@ export class LinkedTreeStore {
     this.setStored(KEYS.EVENTS, events);
 
     // Sync to Supabase
-    try {
-      supabase.from('analytics_events').insert({
-        profile_id: pid,
-        link_id: linkId,
-        event_type: 'LINK_CLICK',
-        timestamp: event.timestamp,
-      }).then(() => {});
-      supabase.rpc('increment_link_clicks', { link_id: linkId }).then(() => {});
-    } catch {}
+    if (isSupabaseConfigured) {
+      try {
+        supabase.from('analytics_events').insert({
+          profile_id: pid,
+          link_id: linkId,
+          event_type: 'LINK_CLICK',
+          timestamp: event.timestamp,
+        }).then(() => {});
+        supabase.rpc('increment_link_clicks', { link_id: linkId }).then(() => {});
+      } catch {}
+    }
   }
 
   public static getAnalytics(profileId?: string, range: '7d' | '30d' | '90d' | '1y' = '30d'): AnalyticsSummary {
@@ -1082,6 +1086,7 @@ export class LinkedTreeStore {
 
   // --- SUPABASE BACKGROUND SYNC WITH RESILIENT ERROR TOLERANCE ---
   private static async syncProfileToSupabase(profile: Profile) {
+    if (!isSupabaseConfigured) return;
     try {
       await supabase.from('profiles').upsert({
         id: profile.id,
@@ -1106,6 +1111,7 @@ export class LinkedTreeStore {
   }
 
   private static async syncLinksToSupabase(links: Link[], profileId: string) {
+    if (!isSupabaseConfigured) return;
     try {
       const records = links.map(l => ({
         id: l.id,
@@ -1130,6 +1136,7 @@ export class LinkedTreeStore {
   }
 
   private static async syncSocialsToSupabase(socials: SocialLink[], profileId: string) {
+    if (!isSupabaseConfigured) return;
     try {
       const records = socials.map(s => ({
         id: s.id,
@@ -1145,6 +1152,7 @@ export class LinkedTreeStore {
   }
 
   private static async syncProjectsToSupabase(projects: Project[], profileId: string) {
+    if (!isSupabaseConfigured) return;
     try {
       const records = projects.map(p => ({
         id: p.id,
@@ -1166,6 +1174,7 @@ export class LinkedTreeStore {
   }
 
   private static async syncAppearanceToSupabase(appearance: AppearanceSettings) {
+    if (!isSupabaseConfigured) return;
     try {
       await supabase.from('appearance_settings').upsert({
         id: appearance.id,

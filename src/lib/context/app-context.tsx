@@ -19,7 +19,20 @@ import {
   Booking
 } from '@/types';
 import { LinkedTreeStore } from '@/lib/data-store';
-import { THEME_PRESETS } from '@/lib/themes';
+import { DEFAULT_APPEARANCE, THEME_PRESETS } from '@/lib/themes';
+import {
+  INITIAL_ANALYTICS,
+  INITIAL_BLOCKS,
+  INITIAL_BOOKINGS,
+  INITIAL_LINKS,
+  INITIAL_ORDERS,
+  INITIAL_PRODUCTS,
+  INITIAL_PROFILE,
+  INITIAL_PROJECTS,
+  INITIAL_SERVICES,
+  INITIAL_SOCIAL_LINKS,
+  INITIAL_SUBSCRIBERS,
+} from '@/lib/mock-data';
 
 interface AppContextType {
   user: User | null;
@@ -104,20 +117,20 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfileState] = useState<Profile>(() => LinkedTreeStore.getProfile());
-  const [links, setLinksState] = useState<Link[]>(() => LinkedTreeStore.getLinks());
-  const [blocks, setBlocksState] = useState<PageBlock[]>(() => LinkedTreeStore.getBlocks());
-  const [products, setProductsState] = useState<Product[]>(() => LinkedTreeStore.getProducts());
-  const [services, setServicesState] = useState<Service[]>(() => LinkedTreeStore.getServices());
-  const [orders, setOrdersState] = useState<Order[]>(() => LinkedTreeStore.getOrders());
-  const [subscribers, setSubscribersState] = useState<Subscriber[]>(() => LinkedTreeStore.getSubscribers());
-  const [bookings, setBookingsState] = useState<Booking[]>(() => LinkedTreeStore.getBookings());
-  const [socialLinks, setSocialLinksState] = useState<SocialLink[]>(() => LinkedTreeStore.getSocialLinks());
-  const [projects, setProjectsState] = useState<Project[]>(() => LinkedTreeStore.getProjects());
-  const [appearance, setAppearanceState] = useState<AppearanceSettings>(() => LinkedTreeStore.getAppearance());
+  const [profile, setProfileState] = useState<Profile>(INITIAL_PROFILE);
+  const [links, setLinksState] = useState<Link[]>(INITIAL_LINKS);
+  const [blocks, setBlocksState] = useState<PageBlock[]>(INITIAL_BLOCKS);
+  const [products, setProductsState] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [services, setServicesState] = useState<Service[]>(INITIAL_SERVICES);
+  const [orders, setOrdersState] = useState<Order[]>(INITIAL_ORDERS);
+  const [subscribers, setSubscribersState] = useState<Subscriber[]>(INITIAL_SUBSCRIBERS);
+  const [bookings, setBookingsState] = useState<Booking[]>(INITIAL_BOOKINGS);
+  const [socialLinks, setSocialLinksState] = useState<SocialLink[]>(INITIAL_SOCIAL_LINKS);
+  const [projects, setProjectsState] = useState<Project[]>(INITIAL_PROJECTS);
+  const [appearance, setAppearanceState] = useState<AppearanceSettings>(DEFAULT_APPEARANCE);
   const [timeRange, setTimeRangeState] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-  const [analytics, setAnalyticsState] = useState<AnalyticsSummary>(() => LinkedTreeStore.getAnalytics(undefined, '30d'));
-  const [activityLogs, setActivityLogsState] = useState<ActivityItem[]>(() => LinkedTreeStore.getActivityLogs());
+  const [analytics, setAnalyticsState] = useState<AnalyticsSummary>(INITIAL_ANALYTICS);
+  const [activityLogs, setActivityLogsState] = useState<ActivityItem[]>([]);
   const [themeMode, setThemeModeState] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
