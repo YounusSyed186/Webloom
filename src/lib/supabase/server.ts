@@ -5,10 +5,7 @@ const supabaseUrl =
   process.env.SUPABASE_URL ||
   'https://owhyoarhxjjyddacvqab.supabase.co';
 
-const supabaseSecretKey =
-  process.env.SUPABASE_SECRET_KEY ||
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  '';
+const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY || '';
 
 /**
  * Supabase Administrative Client (Server-side only)
