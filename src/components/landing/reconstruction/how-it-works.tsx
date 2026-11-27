@@ -221,9 +221,8 @@ export function HowItWorksReconstructed() {
               stroke={isDark ? '#E6B86A' : '#C89D54'}
               strokeWidth="2"
               strokeLinecap="round"
-              style={{
-                pathLength: prefersReducedMotion ? 1 : threadProgress,
-              }}
+              pathLength={prefersReducedMotion ? 1 : undefined}
+              style={prefersReducedMotion ? undefined : { pathLength: threadProgress }}
             />
           </svg>
 
