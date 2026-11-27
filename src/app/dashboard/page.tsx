@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
@@ -32,11 +32,14 @@ export default function DashboardOverviewPage() {
   const { success } = useToast();
   const [copied, setCopied] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [origin, setOrigin] = useState('https://webloom.site');
   const isDark = themeMode === 'dark';
 
-  const publicUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/${profile.username}`
-    : `https://webloom.site/${profile.username}`;
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  const publicUrl = `${origin}/${profile.username}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(publicUrl);
